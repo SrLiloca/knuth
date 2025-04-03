@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista Encadeada com Troca Animada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .input-container {
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 8px;
+            width: 300px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .linked-list-container {
+            margin-top: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+        .node {
+            display: flex;
+            border: 2px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        .node.highlight {
+            background-color: #ffeb3b;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+        .node.found {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .node.moving {
+            z-index: 100;
+            background-color: #2196F3;
+            color: white;
+        }
+        .data {
+            padding: 0 10px;
+            font-weight: bold;
+        }
+        .pointer {
+            display: flex;
+            align-items: center;
+            color: #666;
+        }
+        .pointer::after {
+            content: "→";
+            margin: 0 5px;
+        }
+        .null {
+            color: #999;
+            font-style: italic;
+        }
+        .search-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .status {
+            margin-top: 10px;
+            font-weight: bold;
+            min-height: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista Encadeada com Troca Animada</h1>
+    
+    <div class="input-container">
+        <label for="numbers">Insira números separados por vírgula:</label><br>
+        <input type="text" id="numbers" placeholder="Ex: 1,2,3,4,5">
+        <button onclick="createLinkedList()">Criar Lista</button>
+    </div>
+    
+    <div class="search-container">
+        <label for="searchNumber">Número para pesquisar e trocar:</label><br>
+        <input type="text" id="searchNumber" placeholder="Digite um número">
+        <button onclick="searchAndSwap()" id="searchBtn" disabled>Pesquisar e Trocar</button>
+        <div class="status" id="status"></div>
+    </div>
+    
+    <div id="linkedList" class="linked-list-container"></div>
+
+    <script>
+        let nodeElements = [];
+        let numbers = [];
+        
+        function createLinkedList() {
+            const input = document.getElementById('numbers').value;
+            numbers = input.split(',')
+                .map(num => num.trim())
+                .filter(num => num !== '' && !isNaN(num));
+            
+            const listContainer = document.getElementById('linkedList');
+            listContainer.innerHTML = '';
+            nodeElements = [];
+            
+            if (numbers.length === 0) {
+                listContainer.textContent = 'Por favor, insira números válidos separados por vírgula.';
+                document.getElementById('searchBtn').disabled = true;
+                return;
+            }
+            
+            document.getElementById('searchBtn').disabled = false;
+            
+            // Criar representação visual da lista encadeada
+            for (let i = 0; i < numbers.length; i++) {
+                // Criar nó
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.id = `node-${i}`;
+                
+                // Adicionar dados
+                const data = document.createElement('div');
+                data.className = 'data';
+                data.textContent = numbers[i];
+                node.appendChild(data);
+                
+                // Adicionar ponteiro (exceto para o último elemento)
+                if (i < numbers.length - 1) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer';
+                    node.appendChild(pointer);
+                } else {
+                    const nullPointer = document.createElement('div');
+                    nullPointer.className = 'null';
+                    nullPointer.textContent = 'null';
+                    node.appendChild(nullPointer);
+                }
+                
+                listContainer.appendChild(node);
+                nodeElements.push(node);
+            }
+        }
+        
+        async function searchAndSwap() {
+            const searchInput = document.getElementById('searchNumber').value.trim();
+            const statusElement = document.getElementById('status');
+            
+            if (searchInput === '' || isNaN(searchInput)) {
+                statusElement.textContent = 'Por favor, insira um número válido para pesquisar.';
+                return;
+            }
+            
+            const searchNumber = searchInput;
+            let foundIndex = -1;
+            
+            // Resetar estilos
+            nodeElements.forEach(node => {
+                node.classList.remove('highlight', 'found');
+            });
+            
+            // Animação de pesquisa
+            statusElement.textContent = `Procurando pelo número ${searchNumber}...`;
+            
+            for (let i = 0; i < numbers.length; i++) {
+                nodeElements[i].classList.add('highlight');
+                await sleep(800);
+                
+                if (numbers[i] === searchNumber) {
+                    foundIndex = i;
+                    nodeElements[i].classList.remove('highlight');
+                    nodeElements[i].classList.add('found');
+                    statusElement.textContent = `Número ${searchNumber} encontrado na posição ${i + 1}! Preparando para trocar...`;
+                    await sleep(1000);
+                    break;
+                }
+                
+                nodeElements[i].classList.remove('highlight');
+                await sleep(200);
+            }
+            
+            if (foundIndex === -1) {
+                statusElement.textContent = `Número ${searchNumber} não encontrado na lista.`;
+                return;
+            }
+            
+            // Se já for o primeiro, não precisa trocar
+            if (foundIndex === 0) {
+                statusElement.textContent = `O número ${searchNumber} já é o primeiro da lista!`;
+                return;
+            }
+            
+            // Animação de troca
+            statusElement.textContent = `Trocando o número ${searchNumber} com o primeiro da lista...`;
+            
+            // Destacar os elementos que serão trocados
+            nodeElements[0].classList.add('moving');
+            nodeElements[foundIndex].classList.add('moving');
+            await sleep(1000);
+            
+            // Animação de movimento
+            const firstNode = nodeElements[0];
+            const foundNode = nodeElements[foundIndex];
+            
+            // Obter posições
+            const firstRect = firstNode.getBoundingClientRect();
+            const foundRect = foundNode.getBoundingClientRect();
+            
+            // Calcular diferenças
+            const dx = foundRect.left - firstRect.left;
+            const dy = foundRect.top - firstRect.top;
+            
+            // Aplicar transformações
+            firstNode.style.transform = `translate(${dx}px, ${dy}px)`;
+            foundNode.style.transform = `translate(${-dx}px, ${-dy}px)`;
+            
+            await sleep(1000);
+            
+            // Atualizar a lista e os elementos DOM
+            // Trocar os valores no array
+            [numbers[0], numbers[foundIndex]] = [numbers[foundIndex], numbers[0]];
+            
+            // Atualizar o texto nos nós
+            firstNode.querySelector('.data').textContent = numbers[0];
+            foundNode.querySelector('.data').textContent = numbers[foundIndex];
+            
+            // Resetar transformações
+            firstNode.style.transform = '';
+            foundNode.style.transform = '';
+            
+            // Remover classes de movimento
+            firstNode.classList.remove('moving');
+            foundNode.classList.remove('moving');
+            
+            await sleep(500);
+            
+            statusElement.textContent = `Troca concluída! O número ${searchNumber} agora é o primeiro da lista.`;
+        }
+        
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
