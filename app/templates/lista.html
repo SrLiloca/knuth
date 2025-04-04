@@ -1,40 +1,45 @@
 {% extends 'base.html' %}
+{% block extra_css %}
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
+    .list-card {
+        margin-bottom: 20px;
         padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 100%;
     }
     .input-container {
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
-    input {
+    .list-input {
         padding: 8px;
-        width: 300px;
-        margin-right: 10px;
+        width: 100%;
+        margin-bottom: 10px;
     }
-    button {
+    .list-button {
         padding: 8px 15px;
         background-color: #4CAF50;
         color: white;
         border: none;
         cursor: pointer;
         margin-right: 10px;
+        margin-bottom: 10px;
+        width: 100%;
     }
-    button:hover {
+    .list-button:hover {
         background-color: #45a049;
     }
-    button:disabled {
+    .list-button:disabled {
         background-color: #cccccc;
         cursor: not-allowed;
     }
     .linked-list-container {
-        margin-top: 30px;
+        margin-top: 20px;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: 10px;
+        min-height: 120px;
     }
     .node {
         display: flex;
@@ -59,6 +64,10 @@
         background-color: #2196F3;
         color: white;
     }
+    .node.active-swap {
+        background-color: #ffc107;
+        border-color: #ff9800;
+    }
     .data {
         padding: 0 10px;
         font-weight: bold;
@@ -77,7 +86,7 @@
         font-style: italic;
     }
     .search-container {
-        margin-top: 20px;
+        margin-top: 15px;
         padding: 15px;
         background-color: #f0f0f0;
         border-radius: 5px;
@@ -87,754 +96,701 @@
         font-weight: bold;
         min-height: 24px;
     }
-</style>
+    .progress-container {
+        margin-top: 15px;
+        display: none;
+    }
+    .version-title {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    @media (max-width: 768px) {
+        .list-col {
+            margin-bottom: 30px;
+        }
+    }
 
-{% block page_title %}Lista2{% endblock %}
+    .skip-list-card {
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 100%;
+    }
+    .skip-input-container {
+        margin-bottom: 15px;
+    }
+    .skip-list-input {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .skip-list-button {
+        padding: 8px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    .skip-list-button:hover {
+        background-color: #45a049;
+    }
+    .skip-list-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    .skip-skip-list-container {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .skip-skip-list-level {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 60px;
+    }
+    .skip-node {
+        display: flex;
+        flex-direction: column;
+        border: 2px solid #333;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        transition: all 0.skip-5s ease;
+        position: relative;
+        text-align: center;
+        min-width: 50px;
+    }
+    .skip-node.highlight {
+        background-color: #ffeb3b;
+        transform: scale(1.skip-1);
+        box-shadow: 0 0 10px rgba(0,0,0,0.skip-2);
+    }
+    .skip-node.found {
+        background-color: #4CAF50;
+        color: white;
+    }
+    .skip-node.header {
+        background-color: #2c3e50;
+        color: white;
+        font-weight: bold;
+    }
+    .skip-node-value {
+        font-weight: bold;
+        font-size: 1.skip-1rem;
+    }
+    .skip-node-pointer {
+        height: 20px;
+        border-right: 2px solid #666;
+        margin-right: 5px;
+    }
+    .skip-node-connection {
+        flex-grow: 1;
+        height: 2px;
+        background-color: #666;
+    }
+    .skip-status {
+        margin-top: 10px;
+        font-weight: bold;
+        min-height: 24px;
+    }
+    .skip-version-title {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block page_title %}Lista{% endblock %}
 
 {% block content %}
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Lista</h3>
-        </div>
-        <div class="card-body">
-            <p>Troca</p>
-            <div class="input-container">
-                <label for="numbers">Insira números separados por vírgula:</label><br>
-                <input type="text" id="numbers" placeholder="Ex: 1,2,3,4,5">
-                <button onclick="createLinkedList()">Criar Lista</button>
-            </div>
-            
-            <div class="search-container">
-                <label for="searchNumber">Número para pesquisar e trocar:</label><br>
-                <input type="text" id="searchNumber" placeholder="Digite um número">
-                <button onclick="searchAndSwap()" id="searchBtn" disabled>Pesquisar e Trocar</button>
-                <div class="status" id="status"></div>
-            </div>
-            
-            <div id="linkedList" class="linked-list-container"></div>
+    <div class="container-fluid">
+        <h2 class="text-center mb-4">Listas auto-organizáveis</h2>
         
-            <script>
-                let nodeElements = [];
-                let numbers = [];
+        <div class="row">
+            <!-- Versão 1: Troca Direta -->
+            <div class="col-md-6 list-col">
+                <div class="list-card">
+                    <h3 class="version-title">Transposição</h3>
+                    <p>O elemento encontrado troca de posição com o primeiro elemento</p>
+                    
+                    <div class="input-container">
+                        <label for="numbers1">Números separados por vírgula:</label>
+                        <input type="text" class="list-input" id="numbers1" placeholder="Ex: 1,2,3,4,5">
+                        <button class="list-button" onclick="createLinkedList1()">Criar Lista</button>
+                    </div>
+                    
+                    <div class="search-container">
+                        <label for="searchNumber1">Procurar número:</label>
+                        <input type="text" class="list-input" id="searchNumber1" placeholder="Digite um número">
+                        <button class="list-button" onclick="searchAndSwap1()" id="searchBtn1" disabled>Buscar</button>
+                        <div class="status" id="status1"></div>
+                    </div>
+                    
+                    <div id="linkedList1" class="linked-list-container"></div>
+                </div>
+            </div>
+            
+            <!-- Versão 2: Troca Progressiva -->
+            <div class="col-md-6 list-col">
+                <div class="list-card">
+                    <h3 class="version-title">Movimento para Frente</h3>
+                    <p>O elemento encontrado vai até o início, mantendo a oredem</p>
+                    
+                    <div class="input-container">
+                        <label for="numbers2">Números separados por vírgula:</label>
+                        <input type="text" class="list-input" id="numbers2" placeholder="Ex: 1,2,3,4,5">
+                        <button class="list-button" onclick="createLinkedList2()">Criar Lista</button>
+                    </div>
+                    
+                    <div class="search-container">
+                        <label for="searchNumber2">Procurar um número:</label>
+                        <input type="text" class="list-input" id="searchNumber2" placeholder="Digite um número">
+                        <button class="list-button" onclick="searchAndSwap2()" id="searchBtn2" disabled>Buscar</button>
+                        <div class="progress-container" id="progressContainer2">
+                            <div class="progress">
+                                <div id="swapProgress2" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center mt-2" id="progressText2">Preparando para troca...</div>
+                        </div>
+                        <div class="status" id="status2"></div>
+                    </div>
+                    
+                    <div id="linkedList2" class="linked-list-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==============================================
+        // Versão 1: Troca Direta
+        // ==============================================
+        let nodeElements1 = [];
+        let numbers1 = [];
+        
+        function createLinkedList1() {
+            const input = document.getElementById('numbers1').value;
+            numbers1 = input.split(',')
+                .map(num => num.trim())
+                .filter(num => num !== '' && !isNaN(num));
+            
+            const listContainer = document.getElementById('linkedList1');
+            listContainer.innerHTML = '';
+            nodeElements1 = [];
+            
+            if (numbers1.length === 0) {
+                listContainer.textContent = 'Por favor, insira números válidos separados por vírgula.';
+                document.getElementById('searchBtn1').disabled = true;
+                document.getElementById('status1').textContent = 'Insira números válidos para criar a lista.';
+                return;
+            }
+            
+            document.getElementById('searchBtn1').disabled = false;
+            document.getElementById('status1').textContent = 'Lista criada com sucesso! Agora você pode pesquisar um número.';
+            
+            // Criar representação visual da lista encadeada
+            for (let i = 0; i < numbers1.length; i++) {
+                // Criar nó
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.id = `node1-${i}`;
                 
-                function createLinkedList() {
-                    const input = document.getElementById('numbers').value;
-                    numbers = input.split(',')
-                        .map(num => num.trim())
-                        .filter(num => num !== '' && !isNaN(num));
-                    
-                    const listContainer = document.getElementById('linkedList');
-                    listContainer.innerHTML = '';
-                    nodeElements = [];
-                    
-                    if (numbers.length === 0) {
-                        listContainer.textContent = 'Por favor, insira números válidos separados por vírgula.';
-                        document.getElementById('searchBtn').disabled = true;
-                        return;
-                    }
-                    
-                    document.getElementById('searchBtn').disabled = false;
-                    
-                    // Criar representação visual da lista encadeada
-                    for (let i = 0; i < numbers.length; i++) {
-                        // Criar nó
-                        const node = document.createElement('div');
-                        node.className = 'node';
-                        node.id = `node-${i}`;
-                        
-                        // Adicionar dados
-                        const data = document.createElement('div');
-                        data.className = 'data';
-                        data.textContent = numbers[i];
-                        node.appendChild(data);
-                        
-                        // Adicionar ponteiro (exceto para o último elemento)
-                        if (i < numbers.length - 1) {
-                            const pointer = document.createElement('div');
-                            pointer.className = 'pointer';
-                            node.appendChild(pointer);
-                        } else {
-                            const nullPointer = document.createElement('div');
-                            nullPointer.className = 'null';
-                            nullPointer.textContent = 'null';
-                            node.appendChild(nullPointer);
-                        }
-                        
-                        listContainer.appendChild(node);
-                        nodeElements.push(node);
-                    }
+                // Adicionar dados
+                const data = document.createElement('div');
+                data.className = 'data';
+                data.textContent = numbers1[i];
+                node.appendChild(data);
+                
+                // Adicionar ponteiro (exceto para o último elemento)
+                if (i < numbers1.length - 1) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer';
+                    node.appendChild(pointer);
+                } else {
+                    const nullPointer = document.createElement('div');
+                    nullPointer.className = 'null';
+                    nullPointer.textContent = 'null';
+                    node.appendChild(nullPointer);
+                }
+
+                listContainer.appendChild(node);
+                nodeElements1.push(node);
+            }
+        }
+        
+        async function searchAndSwap1() {
+            const searchInput = document.getElementById('searchNumber1').value.trim();
+            const statusElement = document.getElementById('status1');
+            
+            if (searchInput === '' || isNaN(searchInput)) {
+                statusElement.textContent = 'Por favor, insira um número válido para pesquisar.';
+                return;
+            }
+            
+            const searchNumber = searchInput;
+            let foundIndex = -1;
+            
+            // Resetar estilos
+            nodeElements1.forEach(node => {
+                node.classList.remove('highlight', 'found', 'moving');
+            });
+            
+            // Animação de pesquisa
+            statusElement.textContent = `Procurando pelo número ${searchNumber}...`;
+            
+            for (let i = 0; i < numbers1.length; i++) {
+                nodeElements1[i].classList.add('highlight');
+                await sleep(800);
+                
+                if (numbers1[i] === searchNumber) {
+                    foundIndex = i;
+                    nodeElements1[i].classList.remove('highlight');
+                    nodeElements1[i].classList.add('found');
+                    statusElement.textContent = `Número ${searchNumber} encontrado na posição ${i + 1}! Preparando para trocar...`;
+                    await sleep(1000);
+                    break;
                 }
                 
-                async function searchAndSwap() {
-                    const searchInput = document.getElementById('searchNumber').value.trim();
-                    const statusElement = document.getElementById('status');
+                nodeElements1[i].classList.remove('highlight');
+                await sleep(200);
+            }
+            
+            if (foundIndex === -1) {
+                statusElement.textContent = `Número ${searchNumber} não encontrado na lista.`;
+                return;
+            }
+            
+            // Se já for o primeiro, não precisa trocar
+            if (foundIndex === 0) {
+                statusElement.textContent = `O número ${searchNumber} já é o primeiro da lista!`;
+                return;
+            }
+            
+            // Animação de troca
+            statusElement.textContent = `Trocando o número ${searchNumber} com o primeiro da lista...`;
+            
+            // Destacar os elementos que serão trocados
+            nodeElements1[0].classList.add('moving');
+            nodeElements1[foundIndex].classList.add('moving');
+            await sleep(1000);
+            
+            // Animação de movimento
+            const firstNode = nodeElements1[0];
+            const foundNode = nodeElements1[foundIndex];
+            
+            // Obter posições
+            const firstRect = firstNode.getBoundingClientRect();
+            const foundRect = foundNode.getBoundingClientRect();
+            
+            // Calcular diferenças
+            const dx = foundRect.left - firstRect.left;
+            const dy = foundRect.top - firstRect.top;
+            
+            // Aplicar transformações
+            firstNode.style.transform = `translate(${dx}px, ${dy}px)`;
+            foundNode.style.transform = `translate(${-dx}px, ${-dy}px)`;
+            
+            await sleep(1000);
+            
+            // Atualizar a lista e os elementos DOM
+            // Trocar os valores no array
+            [numbers1[0], numbers1[foundIndex]] = [numbers1[foundIndex], numbers1[0]];
+            
+            // Atualizar o texto nos nós
+            firstNode.querySelector('.data').textContent = numbers1[0];
+            foundNode.querySelector('.data').textContent = numbers1[foundIndex];
+            
+            // Resetar transformações
+            firstNode.style.transform = '';
+            foundNode.style.transform = '';
+            
+            // Remover classes de movimento
+            firstNode.classList.remove('moving');
+            foundNode.classList.remove('moving');
+            
+            await sleep(500);
+            
+            statusElement.textContent = `Troca concluída! O número ${searchNumber} agora é o primeiro da lista.`;
+        }
+
+        // ==============================================
+        // Versão 2: Troca Progressiva
+        // ==============================================
+        let nodeElements2 = [];
+        let numbers2 = [];
+        let animationSpeed = 600;
+        
+        function createLinkedList2() {
+            const input = document.getElementById('numbers2').value;
+            numbers2 = input.split(',')
+                .map(num => num.trim())
+                .filter(num => num !== '' && !isNaN(num));
+            
+            const listContainer = document.getElementById('linkedList2');
+            listContainer.innerHTML = '';
+            nodeElements2 = [];
+            
+            if (numbers2.length === 0) {
+                listContainer.textContent = 'Por favor, insira números válidos separados por vírgula.';
+                document.getElementById('searchBtn2').disabled = true;
+                document.getElementById('status2').textContent = 'Insira números válidos para criar a lista.';
+                return;
+            }
+            
+            document.getElementById('searchBtn2').disabled = false;
+            document.getElementById('status2').textContent = 'Lista criada com sucesso! Agora você pode pesquisar um número.';
+            
+            // Criar representação visual da lista encadeada
+            for (let i = 0; i < numbers2.length; i++) {
+                // Criar nó
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.id = `node2-${i}`;
+                
+                // Adicionar dados
+                const data = document.createElement('div');
+                data.className = 'data';
+                data.textContent = numbers2[i];
+                node.appendChild(data);
+                
+                // Adicionar ponteiro (exceto para o último elemento)
+                if (i < numbers2.length - 1) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer';
+                    node.appendChild(pointer);
+                } else {
+                    const nullPointer = document.createElement('div');
+                    nullPointer.className = 'null';
+                    nullPointer.textContent = 'null';
+                    node.appendChild(nullPointer);
+                }
+                
+                listContainer.appendChild(node);
+                nodeElements2.push(node);
+            }
+        }
+        
+        async function searchAndSwap2() {
+            const searchInput = document.getElementById('searchNumber2').value.trim();
+            const statusElement = document.getElementById('status2');
+            const progressContainer = document.getElementById('progressContainer2');
+            const progressBar = document.getElementById('swapProgress2');
+            const progressText = document.getElementById('progressText2');
+            
+            if (searchInput === '' || isNaN(searchInput)) {
+                statusElement.textContent = 'Por favor, insira um número válido para pesquisar.';
+                return;
+            }
+            
+            const searchNumber = searchInput;
+            let foundIndex = -1;
+            
+            // Resetar estilos
+            nodeElements2.forEach(node => {
+                node.classList.remove('highlight', 'found', 'moving', 'active-swap');
+            });
+            
+            // Animação de pesquisa
+            statusElement.textContent = `Procurando pelo número ${searchNumber}...`;
+            
+            for (let i = 0; i < numbers2.length; i++) {
+                nodeElements2[i].classList.add('highlight');
+                await sleep(animationSpeed / 2);
+                
+                if (numbers2[i] === searchNumber) {
+                    foundIndex = i;
+                    nodeElements2[i].classList.remove('highlight');
+                    nodeElements2[i].classList.add('found');
+                    statusElement.textContent = `Número ${searchNumber} encontrado na posição ${i + 1}! Iniciando troca progressiva...`;
+                    await sleep(animationSpeed);
+                    break;
+                }
+                
+                nodeElements2[i].classList.remove('highlight');
+                await sleep(animationSpeed / 4);
+            }
+            
+            if (foundIndex === -1) {
+                statusElement.textContent = `Número ${searchNumber} não encontrado na lista.`;
+                return;
+            }
+            
+            // Se já for o primeiro, não precisa trocar
+            if (foundIndex === 0) {
+                statusElement.textContent = `O número ${searchNumber} já é o primeiro da lista!`;
+                return;
+            }
+            
+            // Mostrar barra de progresso
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Iniciando troca progressiva...';
+            
+            // Troca progressiva - elemento vai "caminhando" até o início
+            for (let i = foundIndex; i > 0; i--) {
+                // Atualizar barra de progresso
+                const progress = ((foundIndex - i + 1) / foundIndex) * 100;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `Trocando ${numbers2[i]} com ${numbers2[i-1]} (passo ${foundIndex - i + 1} de ${foundIndex})`;
+                
+                // Destacar os elementos que serão trocados
+                nodeElements2[i].classList.add('active-swap');
+                nodeElements2[i-1].classList.add('active-swap');
+                await sleep(animationSpeed / 2);
+                
+                // Animação de troca entre elementos adjacentes
+                const currentNode = nodeElements2[i];
+                const prevNode = nodeElements2[i-1];
+                
+                // Obter posições
+                const currentRect = currentNode.getBoundingClientRect();
+                const prevRect = prevNode.getBoundingClientRect();
+                
+                // Calcular diferenças
+                const dx = prevRect.left - currentRect.left;
+                const dy = prevRect.top - currentRect.top;
+                
+                // Aplicar transformações
+                currentNode.style.transform = `translate(${dx}px, ${dy}px)`;
+                currentNode.style.transition = `transform ${animationSpeed/1000}s ease`;
+                
+                prevNode.style.transform = `translate(${-dx}px, ${-dy}px)`;
+                prevNode.style.transition = `transform ${animationSpeed/1000}s ease`;
+                
+                await sleep(animationSpeed);
+                
+                // Atualizar valores no array
+                [numbers2[i], numbers2[i-1]] = [numbers2[i-1], numbers2[i]];
+                
+                // Atualizar texto nos nós
+                currentNode.querySelector('.data').textContent = numbers2[i];
+                prevNode.querySelector('.data').textContent = numbers2[i-1];
+                
+                // Resetar transformações
+                currentNode.style.transform = '';
+                currentNode.style.transition = '';
+                prevNode.style.transform = '';
+                prevNode.style.transition = '';
+                
+                // Remover destaque
+                currentNode.classList.remove('active-swap');
+                prevNode.classList.remove('active-swap');
+                
+                await sleep(animationSpeed / 2);
+            }
+            
+            // Finalizar animação
+            progressBar.style.width = '100%';
+            progressText.textContent = 'Troca concluída com sucesso!';
+            await sleep(500);
+            progressContainer.style.display = 'none';
+            
+            statusElement.textContent = `Troca concluída! O número ${searchNumber} agora é o primeiro da lista.`;
+        }
+        
+        // Função auxiliar
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+
+    <div class="container-fluid">
+        <h2 class="text-center mb-4">Skip List</h2>
+        
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="skip-list-card">
                     
-                    if (searchInput === '' || isNaN(searchInput)) {
-                        statusElement.textContent = 'Por favor, insira um número válido para pesquisar.';
-                        return;
+                    <p>Estrutura de dados com múltiplos níveis para buscas eficientes</p>
+                    
+                    <div class="skip-input-container">
+                        <label for="skipListNumbers">Números separados por vírgula:</label>
+                        <input type="text" class="skip-list-input" id="skipListNumbers" placeholder="Ex: 1,2,3,4,5">
+                        <button class="skip-list-button" onclick="createSkipList()">Criar Lista</button>
+                    </div>
+                    
+                    <div class="skip-input-container">
+                        <label for="searchSkipNumber">Procurar um número:</label>
+                        <input type="text" class="skip-list-input" id="searchSkipNumber" placeholder="Digite um número">
+                        <button class="skip-list-button" onclick="searchInSkipList()" id="searchSkipBtn" disabled>Buscar</button>
+                        <div class="status" id="skipListStatus"></div>
+                    </div>
+                    
+                    <div id="skipListVisualization" class="skip-skip-list-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estrutura da Skip List
+        let skipList = [];
+        let maxLevel = 3; // Número máximo de níveis na skip list
+        
+        function createSkipList() {
+            const input = document.getElementById('skipListNumbers').value;
+            const numbers = input.split(',')
+                .map(num => num.trim())
+                .filter(num => num !== '' && !isNaN(num))
+                .map(Number)
+                .sort((a, b) => a - b); // Garante que estejam ordenados
+            
+            const listContainer = document.getElementById('skipListVisualization');
+            listContainer.innerHTML = '';
+            
+            if (numbers.length === 0) {
+                listContainer.textContent = 'Por favor, insira números válidos separados por vírgula.';
+                document.getElementById('searchSkipBtn').disabled = true;
+                document.getElementById('skipListStatus').textContent = 'Insira números válidos para criar a Skip List.';
+                return;
+            }
+            
+            document.getElementById('searchSkipBtn').disabled = false;
+            document.getElementById('skipListStatus').textContent = 'Skip List criada com sucesso! Agora você pode pesquisar um número.';
+            
+            // Construir a Skip List (simplificada para visualização)
+            skipList = [];
+            for (let level = 0; level < maxLevel; level++) {
+                skipList[level] = [];
+                const step = Math.pow(2, level);
+                
+                for (let i = 0; i < numbers.length; i += step) {
+                    if (i < numbers.length) {
+                        skipList[level].push(numbers[i]);
+                    }
+                }
+            }
+            
+            // Adicionar o menor valor em todos os níveis (header)
+            for (let level = 0; level < maxLevel; level++) {
+                if (skipList[level].length === 0 || skipList[level][0] !== numbers[0]) {
+                    skipList[level].unshift(numbers[0]);
+                }
+            }
+            
+            // Visualização da Skip List
+            for (let level = maxLevel - 1; level >= 0; level--) {
+                const levelDiv = document.createElement('div');
+                levelDiv.className = 'skip-skip-list-level';
+                
+                // Header do nível
+                const headerNode = document.createElement('div');
+                headerNode.className = 'skip-node header';
+                headerNode.textContent = `Nível ${level + 1}`;
+                levelDiv.appendChild(headerNode);
+                
+                // Nós deste nível
+                for (let i = 0; i < skipList[level].length; i++) {
+                    // Conexão entre nós
+                    if (i > 0) {
+                        const connection = document.createElement('div');
+                        connection.className = 'skip-node-connection';
+                        levelDiv.appendChild(connection);
                     }
                     
-                    const searchNumber = searchInput;
-                    let foundIndex = -1;
+                    // Nó
+                    const node = document.createElement('div');
+                    node.className = 'skip-node';
+                    node.id = `skip-node-${level}-${i}`;
                     
-                    // Resetar estilos
-                    nodeElements.forEach(node => {
-                        node.classList.remove('highlight', 'found');
-                    });
+                    const valueSpan = document.createElement('div');
+                    valueSpan.className = 'skip-node-value';
+                    valueSpan.textContent = skipList[level][i];
+                    node.appendChild(valueSpan);
                     
-                    // Animação de pesquisa
-                    statusElement.textContent = `Procurando pelo número ${searchNumber}...`;
-                    
-                    for (let i = 0; i < numbers.length; i++) {
-                        nodeElements[i].classList.add('highlight');
+                    levelDiv.appendChild(node);
+                }
+                
+                listContainer.appendChild(levelDiv);
+            }
+        }
+        
+        async function searchInSkipList() {
+            const searchInput = document.getElementById('searchSkipNumber').value.trim();
+            const statusElement = document.getElementById('skipListStatus');
+            
+            if (searchInput === '' || isNaN(searchInput)) {
+                statusElement.textContent = 'Por favor, insira um número válido para pesquisar.';
+                return;
+            }
+            
+            const searchNumber = Number(searchInput);
+            statusElement.textContent = `Procurando pelo número ${searchNumber}...`;
+            
+            // Resetar estilos
+            document.querySelectorAll('.skip-node').forEach(node => {
+                node.classList.remove('highlight', 'found');
+            });
+            
+            // Algoritmo de busca em Skip List (simplificado para visualização)
+            let currentLevel = maxLevel - 1;
+            let currentNode = 0;
+            let found = false;
+            
+            while (currentLevel >= 0) {
+                const levelNodes = skipList[currentLevel];
+                let nextNode = currentNode;
+                
+                // Encontrar o último nó menor ou igual ao searchNumber neste nível
+                while (nextNode < levelNodes.length && levelNodes[nextNode] <= searchNumber) {
+                    // Destacar o nó atual
+                    const nodeId = `skip-node-${currentLevel}-${nextNode}`;
+                    const nodeElement = document.getElementById(nodeId);
+                    if (nodeElement) {
+                        nodeElement.classList.add('highlight');
                         await sleep(800);
                         
-                        if (numbers[i] === searchNumber) {
-                            foundIndex = i;
-                            nodeElements[i].classList.remove('highlight');
-                            nodeElements[i].classList.add('found');
-                            statusElement.textContent = `Número ${searchNumber} encontrado na posição ${i + 1}! Preparando para trocar...`;
+                        if (levelNodes[nextNode] === searchNumber) {
+                            nodeElement.classList.remove('highlight');
+                            nodeElement.classList.add('found');
+                            found = true;
+                            statusElement.textContent = `Número ${searchNumber} encontrado no nível ${currentLevel + 1}!`;
                             await sleep(1000);
                             break;
                         }
                         
-                        nodeElements[i].classList.remove('highlight');
-                        await sleep(200);
+                        nodeElement.classList.remove('highlight');
                     }
                     
-                    if (foundIndex === -1) {
-                        statusElement.textContent = `Número ${searchNumber} não encontrado na lista.`;
-                        return;
+                    if (levelNodes[nextNode] < searchNumber) {
+                        currentNode = nextNode;
                     }
                     
-                    // Se já for o primeiro, não precisa trocar
-                    if (foundIndex === 0) {
-                        statusElement.textContent = `O número ${searchNumber} já é o primeiro da lista!`;
-                        return;
-                    }
-                    
-                    // Animação de troca
-                    statusElement.textContent = `Trocando o número ${searchNumber} com o primeiro da lista...`;
-                    
-                    // Destacar os elementos que serão trocados
-                    nodeElements[0].classList.add('moving');
-                    nodeElements[foundIndex].classList.add('moving');
-                    await sleep(1000);
-                    
-                    // Animação de movimento
-                    const firstNode = nodeElements[0];
-                    const foundNode = nodeElements[foundIndex];
-                    
-                    // Obter posições
-                    const firstRect = firstNode.getBoundingClientRect();
-                    const foundRect = foundNode.getBoundingClientRect();
-                    
-                    // Calcular diferenças
-                    const dx = foundRect.left - firstRect.left;
-                    const dy = foundRect.top - firstRect.top;
-                    
-                    // Aplicar transformações
-                    firstNode.style.transform = `translate(${dx}px, ${dy}px)`;
-                    foundNode.style.transform = `translate(${-dx}px, ${-dy}px)`;
-                    
-                    await sleep(1000);
-                    
-                    // Atualizar a lista e os elementos DOM
-                    // Trocar os valores no array
-                    [numbers[0], numbers[foundIndex]] = [numbers[foundIndex], numbers[0]];
-                    
-                    // Atualizar o texto nos nós
-                    firstNode.querySelector('.data').textContent = numbers[0];
-                    foundNode.querySelector('.data').textContent = numbers[foundIndex];
-                    
-                    // Resetar transformações
-                    firstNode.style.transform = '';
-                    foundNode.style.transform = '';
-                    
-                    // Remover classes de movimento
-                    firstNode.classList.remove('moving');
-                    foundNode.classList.remove('moving');
-                    
-                    await sleep(500);
-                    
-                    statusElement.textContent = `Troca concluída! O número ${searchNumber} agora é o primeiro da lista.`;
+                    nextNode++;
+                    await sleep(200);
                 }
                 
-                function sleep(ms) {
-                    return new Promise(resolve => setTimeout(resolve, ms));
-                }
-            </script>
-        </div>
-        <div class="card-body">
-            <p>Frente</p>
-            <div class="input-container">
-                <label for="numbers">Insira números separados por vírgula:</label><br>
-                <input type="text" id="numbers" placeholder="Ex: 1,2,3,4,5">
-                <button onclick="createLinkedList()">Criar Lista</button>
-            </div>
+                if (found) break;
+                
+                // Mover para o nível inferior
+                currentLevel--;
+                statusElement.textContent = `Número ${searchNumber} não encontrado no nível ${currentLevel + 2}. Procurando no nível ${currentLevel + 1}...`;
+                await sleep(1000);
+            }
             
-            <div class="search-container">
-                <label for="searchNumber">Número para pesquisar e trocar:</label><br>
-                <input type="text" id="searchNumber" placeholder="Digite um número">
-                <button onclick="searchAndSwap()" id="searchBtn" disabled>Pesquisar e Trocar</button>
-                <div class="status" id="status"></div>
-            </div>
-            
-            <div id="linkedList" class="linked-list-container"></div>
+            if (!found) {
+                statusElement.textContent = `Número ${searchNumber} não encontrado na Skip List.`;
+            }
+        }
         
-            <script>
-                $(document).ready(function() {
-                    let nodeElements = [];
-                    let numbers = [];
-                    let animationSpeed = 600;
-                    
-                    // Atualizar velocidade da animação
-                    $('#speedControl').on('input', function() {
-                        animationSpeed = parseInt($(this).val());
-                    });
-                    
-                    // Criar lista encadeada
-                    $('#createBtn').click(createLinkedList);
-                    
-                    // Pesquisar e trocar
-                    $('#searchBtn').click(searchAndSwap);
-                    
-                    // Permitir Enter nos campos
-                    $('#numbers').keypress(function(e) {
-                        if (e.which === 13) createLinkedList();
-                    });
-                    
-                    $('#searchNumber').keypress(function(e) {
-                        if (e.which === 13 && !$('#searchBtn').prop('disabled')) searchAndSwap();
-                    });
-                    
-                    function createLinkedList() {
-                        const input = $('#numbers').val();
-                        numbers = input.split(',')
-                            .map(num => $.trim(num))
-                            .filter(num => num !== '' && !isNaN(num));
-                        
-                        const listContainer = $('#linkedList');
-                        listContainer.empty();
-                        nodeElements = [];
-                        
-                        if (numbers.length === 0) {
-                            listContainer.html('<div class="text-danger">Por favor, insira números válidos separados por vírgula.</div>');
-                            $('#searchBtn').prop('disabled', true);
-                            updateStatus('Insira números válidos para criar a lista.', 'danger');
-                            return;
-                        }
-                        
-                        $('#searchBtn').prop('disabled', false);
-                        updateStatus('Lista criada com sucesso! Agora você pode pesquisar um número.', 'success');
-                        
-                        // Criar representação visual da lista encadeada
-                        numbers.forEach((num, i) => {
-                            const node = $(`
-                                <div class="node" id="node-${i}">
-                                    <div class="data">${num}</div>
-                                    ${i < numbers.length - 1 ? 
-                                        '<div class="pointer"><i class="fas fa-arrow-right"></i></div>' : 
-                                        '<div class="null">null</div>'}
-                                </div>
-                            `);
-                            
-                            listContainer.append(node);
-                            nodeElements.push(node);
-                        });
-                    }
-                    
-                    async function searchAndSwap() {
-                        const searchInput = $('#searchNumber').val().trim();
-                        const statusElement = $('#status');
-                        
-                        if (searchInput === '' || isNaN(searchInput)) {
-                            updateStatus('Por favor, insira um número válido para pesquisar.', 'danger');
-                            return;
-                        }
-                        
-                        const searchNumber = searchInput;
-                        let foundIndex = -1;
-                        
-                        // Resetar estilos
-                        nodeElements.forEach(node => {
-                            node.removeClass('highlight found moving active-swap');
-                        });
-                        
-                        // Animação de pesquisa
-                        updateStatus(`Procurando pelo número <strong>${searchNumber}</strong>...`, 'info');
-                        
-                        for (let i = 0; i < numbers.length; i++) {
-                            nodeElements[i].addClass('highlight');
-                            await sleep(animationSpeed / 2);
-                            
-                            if (numbers[i] === searchNumber) {
-                                foundIndex = i;
-                                nodeElements[i].removeClass('highlight');
-                                nodeElements[i].addClass('found');
-                                updateStatus(`Número <strong>${searchNumber}</strong> encontrado na posição ${i + 1}! Iniciando troca progressiva...`, 'success');
-                                await sleep(animationSpeed);
-                                break;
-                            }
-                            
-                            nodeElements[i].removeClass('highlight');
-                            await sleep(animationSpeed / 4);
-                        }
-                        
-                        if (foundIndex === -1) {
-                            updateStatus(`Número <strong>${searchNumber}</strong> não encontrado na lista.`, 'warning');
-                            return;
-                        }
-                        
-                        // Se já for o primeiro, não precisa trocar
-                        if (foundIndex === 0) {
-                            updateStatus(`O número <strong>${searchNumber}</strong> já é o primeiro da lista!`, 'info');
-                            return;
-                        }
-                        
-                        // Mostrar barra de progresso
-                        $('#progressContainer').show();
-                        $('#progressText').text('Iniciando troca progressiva...');
-                        $('#swapProgress').css('width', '0%');
-                        
-                        // Troca progressiva - elemento vai "caminhando" até o início
-                        for (let i = foundIndex; i > 0; i--) {
-                            // Atualizar barra de progresso
-                            const progress = ((foundIndex - i + 1) / foundIndex) * 100;
-                            $('#swapProgress').css('width', `${progress}%`);
-                            $('#progressText').text(`Trocando ${numbers[i]} com ${numbers[i-1]} (passo ${foundIndex - i + 1} de ${foundIndex})`);
-                            
-                            // Destacar os elementos que serão trocados
-                            nodeElements[i].addClass('active-swap');
-                            nodeElements[i-1].addClass('active-swap');
-                            await sleep(animationSpeed / 2);
-                            
-                            // Animação de troca entre elementos adjacentes
-                            const currentNode = nodeElements[i];
-                            const prevNode = nodeElements[i-1];
-                            
-                            // Obter posições
-                            const currentRect = currentNode[0].getBoundingClientRect();
-                            const prevRect = prevNode[0].getBoundingClientRect();
-                            
-                            // Calcular diferenças
-                            const dx = prevRect.left - currentRect.left;
-                            const dy = prevRect.top - currentRect.top;
-                            
-                            // Aplicar transformações
-                            currentNode.css({
-                                'transform': `translate(${dx}px, ${dy}px)`,
-                                'transition': `transform ${animationSpeed/1000}s ease`
-                            });
-                            
-                            prevNode.css({
-                                'transform': `translate(${-dx}px, ${-dy}px)`,
-                                'transition': `transform ${animationSpeed/1000}s ease`
-                            });
-                            
-                            await sleep(animationSpeed);
-                            
-                            // Atualizar valores no array
-                            [numbers[i], numbers[i-1]] = [numbers[i-1], numbers[i]];
-                            
-                            // Atualizar texto nos nós
-                            currentNode.find('.data').text(numbers[i]);
-                            prevNode.find('.data').text(numbers[i-1]);
-                            
-                            // Resetar transformações
-                            currentNode.css({'transform': '', 'transition': ''});
-                            prevNode.css({'transform': '', 'transition': ''});
-                            
-                            // Remover destaque
-                            currentNode.removeClass('active-swap');
-                            prevNode.removeClass('active-swap');
-                            
-                            await sleep(animationSpeed / 2);
-                        }
-                        
-                        // Finalizar animação
-                        $('#swapProgress').css('width', '100%');
-                        $('#progressText').text('Troca concluída com sucesso!');
-                        await sleep(500);
-                        $('#progressContainer').hide();
-                        
-                        updateStatus(`Troca concluída! O número <strong>${searchNumber}</strong> agora é o primeiro da lista.`, 'success');
-                    }
-                    
-                    function updateStatus(message, type) {
-                        const statusElement = $('#status');
-                        statusElement.removeClass('alert-info alert-success alert-warning alert-danger')
-                                   .addClass(`alert-${type}`)
-                                   .html(`<i class="fas fa-${getStatusIcon(type)} me-2"></i>${message}`);
-                    }
-                    
-                    function getStatusIcon(type) {
-                        const icons = {
-                            'info': 'info-circle',
-                            'success': 'check-circle',
-                            'warning': 'exclamation-circle',
-                            'danger': 'times-circle'
-                        };
-                        return icons[type] || 'info-circle';
-                    }
-                    
-                    function sleep(ms) {
-                        return new Promise(resolve => setTimeout(resolve, ms));
-                    }
-                });
-            </script>
-            <div class="card-header">
-            <h3 class="card-title">Skip List</h3>
-        </div>
-        <div class="card-body">
-            <p>Troca</p>
-            <div class="input-container">
-                <label for="numbers">Insira números separados por vírgula:</label><br>
-                <input type="text" id="numbers" placeholder="Ex: 1,2,3,4,5">
-                <button onclick="createLinkedList()">Criar Lista</button>
-            </div>
-            
-            <div class="search-container">
-                <label for="searchNumber">Número para pesquisar e trocar:</label><br>
-                <input type="text" id="searchNumber" placeholder="Digite um número">
-                <button onclick="searchAndSwap()" id="searchBtn" disabled>Pesquisar e Trocar</button>
-                <div class="status" id="status"></div>
-            </div>
-            
-            <div id="linkedList" class="linked-list-container"></div>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+
         
-            <script>
-                $(document).ready(function() {
-                    // Variáveis globais
-                    let skipListLevels = [];
-                    let currentSearch = null;
-                    let searchSteps = [];
-                    let currentStep = 0;
-                    let animationSpeed = 800; // Velocidade padrão
-                    let speedMode = 1; // 1: normal, 2: rápido, 3: máximo
-                    
-                    // Event Listeners
-                    $('#generateBtn').click(generateSkipList);
-                    $('#searchBtn').click(startSearch);
-                    $('#resetBtn').click(() => resetSearch(true));
-                    $('#speedBtn').click(toggleSpeed);
-                    
-                    // Função para alternar a velocidade da animação
-                    function toggleSpeed() {
-                        speedMode = speedMode % 3 + 1;
-                        
-                        switch(speedMode) {
-                            case 1:
-                                animationSpeed = 800;
-                                $('#speedBtn').html('<i class="fas fa-tachometer-alt me-2"></i>Velocidade: Normal');
-                                break;
-                            case 2:
-                                animationSpeed = 400;
-                                $('#speedBtn').html('<i class="fas fa-tachometer-alt me-2"></i>Velocidade: Rápida');
-                                break;
-                            case 3:
-                                animationSpeed = 200;
-                                $('#speedBtn').html('<i class="fas fa-tachometer-alt me-2"></i>Velocidade: Máxima');
-                                break;
-                        }
-                    }
-                    
-                    // Função para gerar a skip list
-                    function generateSkipList() {
-                        const input = $('#numbers').val().trim();
-                        const errorElement = $('#errorAlert');
-                        
-                        resetSearch();
-                        
-                        errorElement.addClass('d-none').text('');
-                        $('#skipList').empty();
-                        $('#skipListContainer').addClass('d-none');
-                        $('#searchMessage').removeClass('search-success search-fail').addClass('search-info')
-                            .html('<i class="fas fa-info-circle me-2"></i> Clique em "Iniciar Busca" para visualizar o processo');
-                        
-                        if (!input) {
-                            showError('Por favor, digite alguns números para criar sua lista!');
-                            return;
-                        }
-                        
-                        let numbers;
-                        try {
-                            numbers = input.split(',').map(num => {
-                                const parsed = parseInt(num.trim());
-                                if (isNaN(parsed)) throw new Error();
-                                return parsed;
-                            });
-                        } catch (e) {
-                            showError('Entrada inválida. Use apenas números separados por vírgulas. Exemplo: 1,5,3,7');
-                            return;
-                        }
-                        
-                        numbers.sort((a, b) => a - b);
-                        skipListLevels = generateLevels(numbers);
-                        displaySkipList(skipListLevels, $('#skipList'));
-                        $('#skipListContainer').removeClass('d-none');
-                    }
-                    
-                    // Gerar níveis da skip list (simplificado)
-                    function generateLevels(sortedNumbers) {
-                        const levels = [];
-                        levels.push([...sortedNumbers]);
-                        
-                        let currentLevel = 0;
-                        while (levels[currentLevel].length > 1) {
-                            const currentLevelNumbers = levels[currentLevel];
-                            const nextLevel = [];
-                            
-                            for (let i = 0; i < currentLevelNumbers.length; i += 2) {
-                                nextLevel.push(currentLevelNumbers[i]);
-                            }
-                            
-                            levels.push(nextLevel);
-                            currentLevel++;
-                        }
-                        
-                        return levels;
-                    }
-                    
-                    // Exibir a skip list com círculos perfeitamente alinhados
-                    function displaySkipList(levels, container) {
-                        container.empty();
-                        
-                        // Encontrar o maior número para alinhamento
-                        const maxNumber = Math.max(...levels[0]);
-                        const maxDigits = maxNumber.toString().length;
-                        
-                        // Exibir do nível mais alto para o mais baixo
-                        for (let i = levels.length - 1; i >= 0; i--) {
-                            const levelDiv = $('<div>').addClass('level');
-                            const label = $('<div>').addClass('level-label').text(`Nível ${i}`);
-                            levelDiv.append(label);
-                            
-                            const nodesContainer = $('<div>').addClass('nodes-container');
-                            
-                            // Adicionar nós com alinhamento correto
-                            let prevNumber = -Infinity;
-                            levels[0].forEach((num, idx) => {
-                                // Verificar se este número existe no nível atual
-                                if (levels[i].includes(num)) {
-                                    // Adicionar espaços vazios para números que pulamos
-                                    while (prevNumber < num && levels[0][idx] !== num) {
-                                        nodesContainer.append($('<div>').addClass('empty-node'));
-                                        idx++;
-                                        prevNumber = levels[0][idx];
-                                    }
-                                    
-                                    const node = $('<div>')
-                                        .addClass('node')
-                                        .text(num)
-                                        .attr('id', `node-${i}-${levels[i].indexOf(num)}`);
-                                    nodesContainer.append(node);
-                                    
-                                    // Adicionar seta se não for o último nó
-                                    if (num !== levels[i][levels[i].length - 1]) {
-                                        nodesContainer.append($('<div>').addClass('node-arrow'));
-                                    }
-                                    
-                                    prevNumber = num;
-                                }
-                            });
-                            
-                            levelDiv.append(nodesContainer);
-                            container.append(levelDiv);
-                        }
-                    }
-                    
-                    // Iniciar a busca animada
-                    function startSearch() {
-                        const searchInput = $('#searchNumber').val().trim();
-                        const errorElement = $('#errorAlert');
-                        
-                        if (!searchInput) {
-                            showError('Digite um número para procurar na lista!');
-                            return;
-                        }
-                        
-                        const numberToFind = parseInt(searchInput);
-                        if (isNaN(numberToFind)) {
-                            showError('Por favor, digite um número válido.');
-                            return;
-                        }
-                        
-                        if (skipListLevels.length === 0) {
-                            showError('Crie uma skip list antes de procurar.');
-                            return;
-                        }
-                        
-                        resetSearch(true);
-                        prepareSearchSteps(numberToFind);
-                        
-                        $('#searchBtn, #generateBtn, #speedBtn').prop('disabled', true);
-                        $('#resetBtn').prop('disabled', false);
-                        
-                        currentStep = 0;
-                        animateSearch();
-                    }
-                    
-                    // Preparar os passos da busca
-                    function prepareSearchSteps(numberToFind) {
-                        searchSteps = [];
-                        currentSearch = numberToFind;
-                        
-                        let currentLevel = skipListLevels.length - 1;
-                        let currentIndex = 0;
-                        let found = false;
-                        
-                        searchSteps.push({
-                            level: currentLevel,
-                            index: currentIndex,
-                            action: "start",
-                            message: `Iniciando busca no nível mais alto (nível ${currentLevel})...`
-                        });
-                        
-                        while (currentLevel >= 0) {
-                            const currentNumbers = skipListLevels[currentLevel];
-                            
-                            let i = currentIndex;
-                            while (i < currentNumbers.length && currentNumbers[i] < numberToFind) {
-                                searchSteps.push({
-                                    level: currentLevel,
-                                    index: i,
-                                    action: "move-right",
-                                    message: `Movendo para o número ${currentNumbers[i]} no nível ${currentLevel}`
-                                });
-                                i++;
-                            }
-                            
-                            if (i < currentNumbers.length && currentNumbers[i] === numberToFind) {
-                                searchSteps.push({
-                                    level: currentLevel,
-                                    index: i,
-                                    action: "found",
-                                    message: `🎉 Número ${numberToFind} encontrado no nível ${currentLevel}!`
-                                });
-                                found = true;
-                                break;
-                            }
-                            
-                            if (i > 0) i--;
-                            
-                            if (currentLevel > 0) {
-                                searchSteps.push({
-                                    level: currentLevel,
-                                    index: i,
-                                    action: "move-down",
-                                    message: `Descendo para o nível ${currentLevel-1}...`
-                                });
-                                
-                                const nextLevelNumbers = skipListLevels[currentLevel-1];
-                                let newIndex = 0;
-                                while (newIndex < nextLevelNumbers.length && nextLevelNumbers[newIndex] < currentNumbers[i]) {
-                                    newIndex++;
-                                }
-                                
-                                currentIndex = newIndex;
-                            } else {
-                                searchSteps.push({
-                                    level: currentLevel,
-                                    index: i,
-                                    action: "not-found",
-                                    message: `Número ${numberToFind} não encontrado na skip list`
-                                });
-                            }
-                            
-                            currentLevel--;
-                        }
-                        
-                        if (!found && currentLevel < 0) {
-                            searchSteps.push({
-                                level: 0,
-                                index: skipListLevels[0].length - 1,
-                                action: "not-found",
-                                message: `Número ${numberToFind} não encontrado na skip list`
-                            });
-                        }
-                    }
-                    
-                    // Animar a busca passo a passo
-                    function animateSearch() {
-                        if (currentStep >= searchSteps.length) {
-                            $('#searchBtn, #generateBtn, #speedBtn').prop('disabled', false);
-                            return;
-                        }
-                        
-                        const step = searchSteps[currentStep];
-                        const messageElement = $('#searchMessage');
-                        
-                        messageElement.removeClass('search-success search-fail search-info')
-                            .addClass(step.action === "found" ? "search-success" : 
-                                     (step.action === "not-found" ? "search-fail" : "search-info"))
-                            .html(`<i class="fas fa-${getIconForAction(step.action)} me-2"></i>${step.message}`);
-                        
-                        $('.node').removeClass('highlight found not-found');
-                        
-                        switch (step.action) {
-                            case "start":
-                            case "move-right":
-                                $(`#node-${step.level}-${step.index}`).addClass('highlight');
-                                break;
-                                
-                            case "move-down":
-                                $(`#node-${step.level}-${step.index}`).addClass('highlight');
-                                break;
-                                
-                            case "found":
-                                $(`#node-${step.level}-${step.index}`).addClass('found');
-                                break;
-                        }
-                        
-                        currentStep++;
-                        
-                        const delay = (step.action === "found" || step.action === "not-found") ? 2000 : animationSpeed;
-                        setTimeout(animateSearch, delay);
-                    }
-                    
-                    // Resetar a busca
-                    function resetSearch(keepList = false) {
-                        currentStep = searchSteps.length;
-                        $('.node').removeClass('highlight found not-found');
-                        
-                        $('#searchMessage').removeClass('search-success search-fail')
-                            .addClass('search-info')
-                            .html('<i class="fas fa-info-circle me-2"></i> Clique em "Iniciar Busca" para visualizar o processo');
-                        
-                        $('#searchBtn, #generateBtn, #speedBtn').prop('disabled', false);
-                        $('#resetBtn').prop('disabled', true);
-                        
-                        if (!keepList) {
-                            $('#searchNumber').val('');
-                        }
-                        
-                        currentSearch = null;
-                        searchSteps = [];
-                        currentStep = 0;
-                    }
-                    
-                    // Mostrar mensagem de erro
-                    function showError(message) {
-                        $('#errorAlert').removeClass('d-none').text(message);
-                        $('html, body').animate({
-                            scrollTop: $('#errorAlert').offset().top - 20
-                        }, 500);
-                    }
-                    
-                    // Obter ícone correspondente à ação
-                    function getIconForAction(action) {
-                        switch(action) {
-                            case "start": return "play";
-                            case "move-right": return "arrow-right";
-                            case "move-down": return "arrow-down";
-                            case "found": return "check-circle";
-                            case "not-found": return "times-circle";
-                            default: return "info-circle";
-                        }
-                    }
-                });
-            </script>
+        
         
     </div>
 {% endblock %}

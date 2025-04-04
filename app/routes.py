@@ -17,3 +17,7 @@ def arvore():
 @bp.route('/hashing')
 def hashing():
     return render_template('hashing.html')
+
+@bp.route('/desafio')
+def desafio():
+    return render_template('desafio.html')

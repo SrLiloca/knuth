@@ -1,0 +1,307 @@
+/* *{
+
+    padding: 0px;
+    margin: 0px;
+    box-sizing: border-box;
+}
+
+
+body{
+
+    background-color: rgb(179, 185, 190);
+}
+
+.container-fluid{
+
+    width: 80%;
+    height: 1280px;
+    border: 2px solid rgb(217, 224, 226);
+    box-shadow: 4px 10px 10px rgb(224, 145, 80);
+    background-color: #fff;
+    margin-left: 10%;
+    margin-top: 100px;
+
+    border-radius: 12px;
+}
+
+.row{
+    width: 100%;
+    height: 300px;
+    border: 1px solid #000;
+    margin-top: 150px;
+
+}
+ */
+.linha-2{
+    width: 100%;
+    height: 300px;
+    /*border: 1px solid #000;*/
+    margin-top: 30px;
+
+}
+
+.linha-3{
+    width: 100%;
+    height: 300px;
+    /*border: 1px solid #000;*/
+    margin-top: 30px;
+
+}
+
+.col-xs-2{
+
+    width: 200px;
+    height: 300px;
+    /* border: 2px solid rgb(236, 168, 129);*/
+    border: 2px solid rgb(255, 89, 35);
+    box-shadow: 4px 8px 8px rgb(165, 160, 158);
+    margin-left: 25px;
+    border-radius: 12px;
+
+}
+
+.col-xs-2{
+
+    position: relative;
+    left: 55px;
+}
+
+.header-cards{
+
+    width: 100%;
+    height: 170px;
+    background-color: rgb(247, 229, 204);
+    border-radius: 12px;
+}
+
+.h-card:hover{
+	 transform: scale(1.10,1.10);
+}
+.image-cards{
+
+    width: 70%;
+    height: 140px;
+    border-radius: 100px;
+    margin-left: 15%;
+    margin-top: 10px;
+    /*border: #000 solid 1px;*/
+    background-color: #fff;
+}
+
+
+
+.image-cards{
+
+    width: 70%;
+    height: 140px;
+    border-radius: 100px;
+    margin-left: 15%;
+    margin-top: 10px;
+    /*border: #000 solid 1px;*/
+    background-color: #fff;
+}
+
+.Nomes-palestrantes-cards{
+
+    margin-left: 7px;
+    margin-top: 30px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 17px;
+}
+
+.Titulos-palestras-cards{
+
+    position: relative;
+    top: -5px;
+    left: 7px;
+
+}
+
+.paragrafos-cards{
+
+    width: 95%;
+    height: auto;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 12px;
+    margin-top: -5px;
+    margin-left: 7px;
+
+}
+
+
+*{
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.container-fluid{
+
+	width: 60%;
+	box-shadow: 0px 1px 10px 0px;
+	height: auto;
+	margin-top: 250px;
+	margin-bottom: 100px;
+
+}
+
+
+
+.nomes-navegacao{
+
+	position: relative;
+	display: inline-block;
+	text-decoration: none;
+	font-family: Arial;
+	font-size: 1em;
+	color: #bdc3c7;
+	margin-top: 10px;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+}
+
+.nomes-navegacao:hover{
+
+	transform: scale( 1.25, 1.25);
+}
+
+.titulo-box-convidado{
+
+	height: 100px;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	
+}
+
+.box-lateral-convidado img{
+
+	position: relative;
+	top: 8%;
+	box-shadow: 0px 2px 4px 0px;
+	
+}
+
+.linha-titulo{
+
+	border: 1px solid rgb(221, 218, 218);
+	
+	
+}
+
+.conteudo{
+
+	margin-top: 20px;
+}
+
+#foto-convidado{
+
+	box-shadow: 0px 1px 8px 0px ;
+}
+
+
+#titulo-atividades{
+
+	margin-top: 50px;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+}
+
+#nome-comvidado{
+
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+ a{
+	
+	text-decoration: none;
+}
+
+#data-palestra{
+
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	color:#343638;
+	margin-top: 5px;
+	margin-left: 15px;
+}
+
+#local-palestra{
+
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	color:#343638;
+	margin-top: 5px;
+	margin-left: 15px;
+	
+}
+
+.palestrante-palestra{
+
+	display: inline-block;
+	margin-left: 15px;
+	color:#343638;
+	z-index: 3;
+
+}
+
+.conteudo-atividades{
+
+	width: 100%;
+	height: 560px;
+	margin-top: -100px;
+}
+
+.container-atividades{
+
+	border: 1px solid rgb(221, 218, 218);
+	border-radius: 10px;
+	
+}
+
+.container-atividades{
+	
+	border-left: 6px solid #e88830 ;
+	
+/*	6px solid #65e7ab;*/
+
+}
+
+.atividadeprincipal{
+
+	margin-top: -10px;
+
+}
+.atividadeprincipal strong{
+
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 1em;
+	margin-left: 15px;
+	color: #343638;
+	
+}
+
+.atividadetema{
+
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	font-size: 18px;
+	margin-left: 11px;
+	color: #343638;
+	margin-top: -10px;
+}
+
+.container-atividades:hover{
+
+	transform: scale(0.99, 0.99);
+	box-shadow: 0px 2px 8px 0px;
+}
+
+#resumo-convidado p{
+	width: 50%;
+	height: 100px;
+	position: relative;
+	top: 15px;
+	left: 35%;
+}
+
+#resumo-convidado p:hover{
+
+	transform: scale(1.30, 1.30);
+}
+

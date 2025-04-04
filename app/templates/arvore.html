@@ -2,13 +2,1748 @@
 
 {% block page_title %}Arvore{% endblock %}
 
+{% block extra_css %}
+<style>
+    .tree-card {
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 100%;
+    }
+    .input-container {
+        margin-bottom: 15px;
+    }
+    .tree-input {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .tree-button {
+        padding: 8px 15px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    .add-btn {
+        background-color: #4CAF50;
+    }
+    .add-btn:hover {
+        background-color: #45a049;
+    }
+    .remove-btn {
+        background-color: #f44336;
+    }
+    .remove-btn:hover {
+        background-color: #d32f2f;
+    }
+    .search-btn {
+        background-color: #2196F3;
+    }
+    .search-btn:hover {
+        background-color: #0b7dda;
+    }
+    .traversal-btn {
+        background-color: #ff9800;
+    }
+    .traversal-btn:hover {
+        background-color: #e68a00;
+    }
+    .tree-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    #tree-container {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        margin: 20px 0;
+        overflow: auto;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+    }
+    .node {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        transition: all 1s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+        background-color: #4dabf7;
+        transform: scale(0);
+    }
+    .node.highlight {
+        background-color: #ffeb3b;
+        color: #333;
+        transform: scale(1.2);
+    }
+    .node.found {
+        background-color: #4CAF50;
+        transform: scale(1.2);
+    }
+    .node.current {
+        background-color: #2196F3;
+        transform: scale(1.2);
+    }
+    .line {
+        position: absolute;
+        height: 2px;
+        background-color: #495057;
+        transform-origin: 0 0;
+        z-index: 1;
+        transition: all 1s ease-in-out;
+        opacity: 0;
+    }
+    .removing {
+        animation: shake 0.5s ease-in-out;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+    .status {
+        margin-top: 10px;
+        font-weight: bold;
+        min-height: 24px;
+    }
+    .traversal-result {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        min-height: 20px;
+    }
+    .version-title {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .controls-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .b_tree-card {
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 100%;
+    }
+    .b_input-container {
+        margin-bottom: 15px;
+    }
+    .b_tree-input {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .b_tree-button {
+        padding: 8px 15px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    .b_add-btn {
+        background-color: #4CAF50;
+    }
+    .b_add-btn:hover {
+        background-color: #45a049;
+    }
+    .b_remove-btn {
+        background-color: #f44336;
+    }
+    .b_remove-btn:hover {
+        background-color: #d32f2f;
+    }
+    .b_search-btn {
+        background-color: #2196F3;
+    }
+    .b_search-btn:hover {
+        background-color: #0b7dda;
+    }
+    .b_traversal-btn {
+        background-color: #ff9800;
+    }
+    .b_traversal-btn:hover {
+        background-color: #e68a00;
+    }
+    .b_tree-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+    }
+    #b_tree-container {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        margin: 20px 0;
+        overflow: auto;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+    }
+    .b_node {
+        position: absolute;
+        min-width: 100px;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        transition: all 0.5s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+        background-color: #4dabf7;
+        transform: scale(0);
+        padding: 10px;
+        border: 2px solid #333;
+    }
+    .b_node.b_highlight {
+        background-color: #ffeb3b;
+        color: #333;
+        transform: scale(1.1);
+    }
+    .b_node.b_found {
+        background-color: #4CAF50;
+        transform: scale(1.1);
+    }
+    .b_node.b_current {
+        background-color: #2196F3;
+        transform: scale(1.1);
+    }
+    .b_node-values {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .b_node-value {
+        margin: 5px;
+        padding: 5px 10px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+    .b_node-children {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    .b_line {
+        position: absolute;
+        height: 2px;
+        background-color: #495057;
+        transform-origin: 0 0;
+        z-index: 1;
+        transition: all 0.5s ease-in-out;
+        opacity: 0;
+    }
+    .b_removing {
+        animation: b_shake 0.5s ease-in-out;
+    }
+    @keyframes b_shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+    .b_status {
+        margin-top: 10px;
+        font-weight: bold;
+        min-height: 24px;
+    }
+    .b_traversal-result {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+        min-height: 20px;
+    }
+    .b_version-title {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .b_controls-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .b_order-control {
+        margin-bottom: 15px;
+    }
+    .tree-card {
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        height: 100%;
+    }
+    .input-container {
+        margin-bottom: 15px;
+    }
+    .tree-input {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .tree-button {
+        padding: 8px 15px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    .generate-btn {
+        background-color: #9c27b0;
+    }
+    .generate-btn:hover {
+        background-color: #7b1fa2;
+    }
+    .fib-btn {
+        background-color: #ff9800;
+    }
+    .fib-btn:hover {
+        background-color: #f57c00;
+    }
+    .animate-btn {
+        background-color: #2196F3;
+    }
+    .animate-btn:hover {
+        background-color: #0b7dda;
+    }
+    #f_tree-container {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        margin: 20px 0;
+        overflow: auto;
+        border: 1px solid #ddd;
+        background-color: #f9f9f9;
+    }
+    .f_node {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        transition: all 1s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        z-index: 2;
+        background-color: #4dabf7;
+        transform: scale(0);
+    }
+    .f_node.highlight {
+        background-color: #ffeb3b;
+        color: #333;
+        transform: scale(1.2);
+    }
+    .f_node.fib {
+        background-color: #4CAF50;
+    }
+    .f_node.current {
+        background-color: #2196F3;
+        transform: scale(1.2);
+    }
+    .f_line {
+        position: absolute;
+        height: 2px;
+        background-color: #495057;
+        transform-origin: 0 0;
+        z-index: 1;
+        transition: all 1s ease-in-out;
+        opacity: 0;
+    }
+    .f_status {
+        margin-top: 10px;
+        font-weight: bold;
+        min-height: 24px;
+    }
+    .version-title {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 10px;
+    }
+    .controls-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    .fib-sequence {
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+    }
+    .slider-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .slider-container input {
+        flex-grow: 1;
+        margin: 0 10px;
+    }
+    .slider-value {
+        width: 30px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Bem-vindo</h3>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Árvore AVL -->
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">Árvore Binária de Busca AVL</h2>
+            <div class="tree-card">
+                <p>Estrutura de dados que mantém balanceamento automático</p>
+                
+                <div class="input-container">
+                    <label for="treeValue">Valor para operação:</label>
+                    <input type="number" class="tree-input" id="treeValue" placeholder="Digite um número">
+                    
+                    <div class="controls-container">
+                        <button class="tree-button add-btn" onclick="addToTree()">Adicionar</button>
+                        <button class="tree-button remove-btn" onclick="removeFromTree()">Remover</button>
+                        <button class="tree-button search-btn" onclick="searchInTree()">Buscar</button>
+                        <button class="tree-button traversal-btn" onclick="inOrderTraversal()">Percorrer em Ordem</button>
+                    </div>
+                    
+                    <div class="status" id="treeStatus">Insira um valor para começar.</div>
+                    <div class="traversal-result" id="traversalResult"></div>
+                </div>
+                
+                <div id="tree-container">Árvore vazia. Adicione alguns valores.</div>
+            </div>
         </div>
-        <div class="card-body">
-            <p>Esta é a página inicial da aplicação.</p>
+        
+        <!-- Árvore B -->
+        <div class="col-md-6">
+            <h2 class="text-center mb-4">Árvore B</h2>
+            <div class="b_tree-card">
+                <p>Estrutura de dados para sistemas de armazenamento com balanceamento automático</p>
+                
+                <div class="b_order-control">
+                    <label for="b_treeOrder">Ordem da Árvore B (mínimo 3):</label>
+                    <input type="number" class="b_tree-input" id="b_treeOrder" min="3" value="3">
+                    <button class="b_tree-button b_add-btn" onclick="b_initializeTree()">Inicializar Árvore</button>
+                </div>
+                
+                <div class="b_input-container">
+                    <label for="b_treeValue">Valor para operação:</label>
+                    <input type="number" class="b_tree-input" id="b_treeValue" placeholder="Digite um número">
+                    
+                    <div class="b_controls-container">
+                        <button class="b_tree-button b_add-btn" onclick="b_addToTree()" id="b_addBtn" disabled>Adicionar</button>
+                        <button class="b_tree-button b_remove-btn" onclick="b_removeFromTree()" id="b_removeBtn" disabled>Remover</button>
+                        <button class="b_tree-button b_search-btn" onclick="b_searchInTree()" id="b_searchBtn" disabled>Buscar</button>
+                        <button class="b_tree-button b_traversal-btn" onclick="b_inOrderTraversal()" id="b_traversalBtn" disabled>Percorrer em Ordem</button>
+                    </div>
+                    
+                    <div class="b_status" id="b_treeStatus">Defina a ordem da árvore e clique em Inicializar.</div>
+                    <div class="b_traversal-result" id="b_traversalResult"></div>
+                </div>
+                
+                <div id="b_tree-container">Árvore não inicializada. Defina a ordem e clique em Inicializar.</div>
+            </div>
         </div>
     </div>
-{% endblock %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Classe AVLNode
+    class AVLNode {
+        constructor(value) {
+            this.value = value;
+            this.left = null;
+            this.right = null;
+            this.height = 1;
+        }
+    }
+
+    // Classe AVLTree
+    class AVLTree {
+        constructor() {
+            this.root = null;
+        }
+        
+        getHeight(node) {
+            return node ? node.height : 0;
+        }
+        
+        updateHeight(node) {
+            node.height = Math.max(this.getHeight(node.left), this.getHeight(node.right)) + 1;
+        }
+        
+        balanceFactor(node) {
+            return this.getHeight(node.left) - this.getHeight(node.right);
+        }
+        
+        rotateRight(y) {
+            const x = y.left;
+            const T2 = x.right;
+            
+            x.right = y;
+            y.left = T2;
+            
+            this.updateHeight(y);
+            this.updateHeight(x);
+            
+            return x;
+        }
+        
+        rotateLeft(x) {
+            const y = x.right;
+            const T2 = y.left;
+            
+            y.left = x;
+            x.right = T2;
+            
+            this.updateHeight(x);
+            this.updateHeight(y);
+            
+            return y;
+        }
+        
+        balance(node) {
+            this.updateHeight(node);
+            
+            const bf = this.balanceFactor(node);
+            
+            // Left Heavy
+            if (bf > 1) {
+                if (this.balanceFactor(node.left) < 0) {
+                    node.left = this.rotateLeft(node.left);
+                }
+                return this.rotateRight(node);
+            }
+            
+            // Right Heavy
+            if (bf < -1) {
+                if (this.balanceFactor(node.right) > 0) {
+                    node.right = this.rotateRight(node.right);
+                }
+                return this.rotateLeft(node);
+            }
+            
+            return node;
+        }
+        
+        insert(value) {
+            this.root = this._insert(this.root, value);
+        }
+        
+        _insert(node, value) {
+            if (!node) return new AVLNode(value);
+            
+            if (value < node.value) {
+                node.left = this._insert(node.left, value);
+            } else if (value > node.value) {
+                node.right = this._insert(node.right, value);
+            } else {
+                return node; // Valores iguais não são permitidos
+            }
+            
+            return this.balance(node);
+        }
+        
+        findMin(node) {
+            return node.left ? this.findMin(node.left) : node;
+        }
+        
+        remove(value) {
+            this.root = this._remove(this.root, value);
+        }
+        
+        _remove(node, value) {
+            if (!node) return null;
+            
+            if (value < node.value) {
+                node.left = this._remove(node.left, value);
+            } else if (value > node.value) {
+                node.right = this._remove(node.right, value);
+            } else {
+                if (!node.left || !node.right) {
+                    const temp = node.left || node.right;
+                    node = temp || null;
+                } else {
+                    const temp = this.findMin(node.right);
+                    node.value = temp.value;
+                    node.right = this._remove(node.right, temp.value);
+                }
+            }
+            
+            if (!node) return null;
+            
+            return this.balance(node);
+        }
+        
+        find(value) {
+            return this._find(this.root, value);
+        }
+        
+        _find(node, value) {
+            if (!node) return null;
+            if (value === node.value) return node;
+            if (value < node.value) return this._find(node.left, value);
+            return this._find(node.right, value);
+        }
+        
+        inOrder(node = this.root, result = []) {
+            if (!node) return result;
+            
+            this.inOrder(node.left, result);
+            result.push(node.value);
+            this.inOrder(node.right, result);
+            
+            return result;
+        }
+    }
+
+    // Variáveis globais para AVL
+    const tree = new AVLTree();
+    const treeContainer = $('#tree-container');
+    let nodeElements = {};
+    let lineElements = [];
+    let traversalSequence = [];
+    let animationSpeed = 800;
+
+    // Funções de Visualização para AVL
+    function clearTreeVisualization() {
+        treeContainer.empty();
+        nodeElements = {};
+        lineElements = [];
+    }
+
+    function calculatePositions(node, level, pos, positions, width, depth) {
+        if (!node) return;
+        
+        const spacing = width / (Math.pow(2, level + 1)) * (0.6 + (0.4 / (depth + 1)));
+        
+        positions[node.value] = {
+            x: pos,
+            y: level * 80 + 50
+        };
+        
+        if (node.left) calculatePositions(node.left, level + 1, pos - spacing, positions, width, depth);
+        if (node.right) calculatePositions(node.right, level + 1, pos + spacing, positions, width, depth);
+    }
+
+    function getTreeDepth(node) {
+        if (!node) return 0;
+        return 1 + Math.max(getTreeDepth(node.left), getTreeDepth(node.right));
+    }
+
+    function drawTree() {
+        clearTreeVisualization();
+        
+        const positions = {};
+        if (tree.root) {
+            const treeDepth = getTreeDepth(tree.root);
+            calculatePositions(tree.root, 0, treeContainer.width() / 2, positions, treeContainer.width(), treeDepth);
+            
+            // Desenhar linhas
+            Object.keys(positions).forEach(value => {
+                const node = tree.find(parseInt(value));
+                const pos = positions[value];
+                
+                if (node.left) {
+                    const leftPos = positions[node.left.value];
+                    drawLine(pos.x, pos.y, leftPos.x, leftPos.y);
+                }
+                if (node.right) {
+                    const rightPos = positions[node.right.value];
+                    drawLine(pos.x, pos.y, rightPos.x, rightPos.y);
+                }
+            });
+            
+            // Desenhar nós
+            Object.keys(positions).forEach(value => {
+                drawNode(parseInt(value), positions[value].x, positions[value].y);
+            });
+        } else {
+            treeContainer.text('Árvore vazia. Adicione alguns valores.');
+        }
+    }
+
+    function drawNode(value, x, y) {
+        const node = $(`
+            <div class="node" id="node-${value}" style="
+                left: ${x - 25}px; 
+                top: ${y - 25}px;
+            ">${value}</div>
+        `);
+        
+        treeContainer.append(node);
+        nodeElements[value] = node;
+        
+        // Animação de entrada
+        setTimeout(() => {
+            node.css('transform', 'scale(1)');
+        }, 10);
+    }
+
+    function drawLine(x1, y1, x2, y2) {
+        const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+        
+        const line = $(`
+            <div class="line" style="
+                width: ${length}px;
+                left: ${x1}px;
+                top: ${y1}px;
+                transform: rotate(${angle}deg);
+            "></div>
+        `);
+        
+        treeContainer.append(line);
+        lineElements.push(line);
+        
+        // Animação de entrada
+        setTimeout(() => {
+            line.css('opacity', '1');
+        }, 500);
+    }
+
+    function animateRemoval(value) {
+        const node = nodeElements[value];
+        if (node) {
+            node.addClass('removing');
+            setTimeout(() => {
+                node.css({
+                    'transform': 'scale(0)',
+                    'opacity': '0'
+                });
+            }, 500);
+        }
+    }
+
+    // Funções de Animação e Operações para AVL
+    async function highlightNode(value, className) {
+        const nodeElement = $(`#node-${value}`);
+        if (nodeElement.length) {
+            nodeElement.addClass(className);
+            await sleep(animationSpeed);
+            nodeElement.removeClass(className);
+            await sleep(200);
+        }
+    }
+
+    async function searchNode(node, value) {
+        if (!node) {
+            document.getElementById('treeStatus').textContent = `Valor ${value} não encontrado na árvore.`;
+            return false;
+        }
+        
+        await highlightNode(node.value, 'current');
+        
+        if (value === node.value) {
+            document.getElementById('treeStatus').textContent = `Valor ${value} encontrado!`;
+            await highlightNode(node.value, 'found');
+            return true;
+        } else if (value < node.value) {
+            document.getElementById('treeStatus').textContent = `Procurando ${value} (é menor que ${node.value})...`;
+            return await searchNode(node.left, value);
+        } else {
+            document.getElementById('treeStatus').textContent = `Procurando ${value} (é maior que ${node.value})...`;
+            return await searchNode(node.right, value);
+        }
+    }
+
+    async function inOrderTraversal(node = tree.root) {
+        if (!node) return;
+        
+        // Limpar resultado anterior
+        if (node === tree.root) {
+            traversalSequence = [];
+            document.getElementById('traversalResult').textContent = '';
+            document.getElementById('treeStatus').textContent = 'Iniciando percurso em ordem...';
+            await sleep(500);
+        }
+        
+        await inOrderTraversal(node.left);
+        
+        // Processar nó atual
+        traversalSequence.push(node.value);
+        document.getElementById('traversalResult').textContent = traversalSequence.join(' → ');
+        await highlightNode(node.value, 'highlight');
+        
+        await inOrderTraversal(node.right);
+        
+        if (node === tree.root) {
+            document.getElementById('treeStatus').textContent = 'Percurso em ordem concluído!';
+        }
+    }
+
+    // Funções de Interface para AVL
+    function addToTree() {
+        const value = parseInt(document.getElementById('treeValue').value);
+        if (isNaN(value)) {
+            document.getElementById('treeStatus').textContent = 'Por favor, insira um número válido.';
+            return;
+        }
+        
+        if (tree.find(value)) {
+            document.getElementById('treeStatus').textContent = `Valor ${value} já existe na árvore.`;
+            return;
+        }
+        
+        tree.insert(value);
+        drawTree();
+        document.getElementById('treeStatus').textContent = `Valor ${value} adicionado à árvore.`;
+        document.getElementById('treeValue').value = '';
+    }
+
+    function removeFromTree() {
+        const value = parseInt(document.getElementById('treeValue').value);
+        if (isNaN(value)) {
+            document.getElementById('treeStatus').textContent = 'Por favor, insira um número válido.';
+            return;
+        }
+        
+        if (!tree.find(value)) {
+            document.getElementById('treeStatus').textContent = `Valor ${value} não encontrado na árvore.`;
+            return;
+        }
+        
+        animateRemoval(value);
+        setTimeout(() => {
+            tree.remove(value);
+            drawTree();
+            document.getElementById('treeStatus').textContent = `Valor ${value} removido da árvore.`;
+            document.getElementById('treeValue').value = '';
+        }, 1000);
+    }
+
+    async function searchInTree() {
+        const value = parseInt(document.getElementById('treeValue').value);
+        if (isNaN(value)) {
+            document.getElementById('treeStatus').textContent = 'Por favor, insira um número válido.';
+            return;
+        }
+        
+        await searchNode(tree.root, value);
+        document.getElementById('treeValue').value = '';
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Inicialização AVL
+    $(document).ready(function() {
+        // Árvore começa vazia
+        drawTree();
+    });
+
+    // Classe BTreeNode
+    class BTreeNode {
+        constructor(b_order, b_isLeaf = true) {
+            this.b_order = b_order;
+            this.b_isLeaf = b_isLeaf;
+            this.b_keys = [];
+            this.b_children = [];
+            this.b_parent = null;
+        }
+        
+        get b_isFull() {
+            return this.b_keys.length >= this.b_order - 1;
+        }
+    }
+
+    // Classe BTree
+    class BTree {
+        constructor(b_order = 3) {
+            this.b_order = b_order;
+            this.b_root = new BTreeNode(b_order, true);
+            this.b_minKeys = Math.ceil(b_order / 2) - 1;
+        }
+        
+        b_search(b_key, b_node = this.b_root) {
+            let b_i = 0;
+            while (b_i < b_node.b_keys.length && b_key > b_node.b_keys[b_i]) {
+                b_i++;
+            }
+            
+            if (b_i < b_node.b_keys.length && b_key === b_node.b_keys[b_i]) {
+                return { b_node, b_index: b_i };
+            }
+            
+            if (b_node.b_isLeaf) {
+                return null;
+            }
+            
+            return this.b_search(b_key, b_node.b_children[b_i]);
+        }
+        
+        b_insert(b_key) {
+            const b_root = this.b_root;
+            
+            if (b_root.b_keys.length === this.b_order - 1) {
+                const b_newRoot = new BTreeNode(this.b_order, false);
+                b_newRoot.b_children.push(b_root);
+                b_root.b_parent = b_newRoot;
+                this.b_root = b_newRoot;
+                this.b_splitChild(b_newRoot, 0);
+            }
+            
+            this.b_insertNonFull(this.b_root, b_key);
+        }
+        
+        b_insertNonFull(b_node, b_key) {
+            let b_i = b_node.b_keys.length - 1;
+            
+            if (b_node.b_isLeaf) {
+                while (b_i >= 0 && b_key < b_node.b_keys[b_i]) {
+                    b_i--;
+                }
+                b_node.b_keys.splice(b_i + 1, 0, b_key);
+            } else {
+                while (b_i >= 0 && b_key < b_node.b_keys[b_i]) {
+                    b_i--;
+                }
+                b_i++;
+                
+                if (b_node.b_children[b_i].b_keys.length === this.b_order - 1) {
+                    this.b_splitChild(b_node, b_i);
+                    if (b_key > b_node.b_keys[b_i]) {
+                        b_i++;
+                    }
+                }
+                
+                this.b_insertNonFull(b_node.b_children[b_i], b_key);
+            }
+        }
+        
+        b_splitChild(b_parent, b_index) {
+            const b_order = this.b_order;
+            const b_child = b_parent.b_children[b_index];
+            const b_newNode = new BTreeNode(b_order, b_child.b_isLeaf);
+            b_newNode.b_parent = b_parent;
+            
+            const b_mid = Math.floor((b_order - 1) / 2);
+            const b_midKey = b_child.b_keys[b_mid];
+            
+            // Move keys and children to new node
+            b_newNode.b_keys = b_child.b_keys.splice(b_mid + 1);
+            if (!b_child.b_isLeaf) {
+                b_newNode.b_children = b_child.b_children.splice(b_mid + 1);
+                b_newNode.b_children.forEach(b_c => b_c.b_parent = b_newNode);
+            }
+            
+            // Insert midKey to parent
+            b_parent.b_keys.splice(b_index, 0, b_midKey);
+            b_parent.b_children.splice(b_index + 1, 0, b_newNode);
+        }
+        
+        b_remove(b_key) {
+            this._b_remove(this.b_root, b_key);
+            
+            // If root has no keys but has a child, make that child the new root
+            if (this.b_root.b_keys.length === 0 && !this.b_root.b_isLeaf) {
+                this.b_root = this.b_root.b_children[0];
+                this.b_root.b_parent = null;
+            }
+        }
+        
+        _b_remove(b_node, b_key) {
+            const b_index = b_node.b_keys.findIndex(b_k => b_k === b_key);
+            
+            if (b_index !== -1) {
+                if (b_node.b_isLeaf) {
+                    // Case 1: Key is in leaf node
+                    b_node.b_keys.splice(b_index, 1);
+                } else {
+                    // Case 2: Key is in internal node
+                    const b_predecessor = this.b_getPredecessor(b_node, b_index);
+                    b_node.b_keys[b_index] = b_predecessor;
+                    this._b_remove(b_node.b_children[b_index], b_predecessor);
+                }
+            } else {
+                if (b_node.b_isLeaf) {
+                    return; // Key not found
+                }
+                
+                // Find the child where the key might be
+                let b_childIndex = 0;
+                while (b_childIndex < b_node.b_keys.length && b_key > b_node.b_keys[b_childIndex]) {
+                    b_childIndex++;
+                }
+                
+                const b_child = b_node.b_children[b_childIndex];
+                if (b_child.b_keys.length > this.b_minKeys) {
+                    this._b_remove(b_child, b_key);
+                    return;
+                }
+                
+                // Rebalance the tree
+                if (b_childIndex > 0 && b_node.b_children[b_childIndex - 1].b_keys.length > this.b_minKeys) {
+                    // Borrow from left sibling
+                    this.b_borrowFromLeft(b_node, b_childIndex);
+                } else if (b_childIndex < b_node.b_children.length - 1 && b_node.b_children[b_childIndex + 1].b_keys.length > this.b_minKeys) {
+                    // Borrow from right sibling
+                    this.b_borrowFromRight(b_node, b_childIndex);
+                } else {
+                    // Merge with sibling
+                    if (b_childIndex > 0) {
+                        // Merge with left sibling
+                        this.b_mergeNodes(b_node, b_childIndex - 1);
+                        b_childIndex--;
+                    } else {
+                        // Merge with right sibling
+                        this.b_mergeNodes(b_node, b_childIndex);
+                    }
+                }
+                
+                this._b_remove(b_node.b_children[b_childIndex], b_key);
+            }
+        }
+        
+        b_getPredecessor(b_node, b_index) {
+            let b_current = b_node.b_children[b_index];
+            while (!b_current.b_isLeaf) {
+                b_current = b_current.b_children[b_current.b_children.length - 1];
+            }
+            return b_current.b_keys[b_current.b_keys.length - 1];
+        }
+        
+        b_borrowFromLeft(b_parent, b_index) {
+            const b_child = b_parent.b_children[b_index];
+            const b_leftSibling = b_parent.b_children[b_index - 1];
+            
+            // Move key from parent to child
+            b_child.b_keys.unshift(b_parent.b_keys[b_index - 1]);
+            
+            // Move key from left sibling to parent
+            b_parent.b_keys[b_index - 1] = b_leftSibling.b_keys.pop();
+            
+            // Move child pointer if not leaf
+            if (!b_child.b_isLeaf) {
+                b_child.b_children.unshift(b_leftSibling.b_children.pop());
+                b_child.b_children[0].b_parent = b_child;
+            }
+        }
+        
+        b_borrowFromRight(b_parent, b_index) {
+            const b_child = b_parent.b_children[b_index];
+            const b_rightSibling = b_parent.b_children[b_index + 1];
+            
+            // Move key from parent to child
+            b_child.b_keys.push(b_parent.b_keys[b_index]);
+            
+            // Move key from right sibling to parent
+            b_parent.b_keys[b_index] = b_rightSibling.b_keys.shift();
+            
+            // Move child pointer if not leaf
+            if (!b_child.b_isLeaf) {
+                b_child.b_children.push(b_rightSibling.b_children.shift());
+                b_child.b_children[b_child.b_children.length - 1].b_parent = b_child;
+            }
+        }
+        
+        b_mergeNodes(b_parent, b_index) {
+            const b_leftChild = b_parent.b_children[b_index];
+            const b_rightChild = b_parent.b_children[b_index + 1];
+            
+            // Move key from parent to left child
+            b_leftChild.b_keys.push(b_parent.b_keys.splice(b_index, 1)[0]);
+            
+            // Move keys from right child to left child
+            b_leftChild.b_keys.push(...b_rightChild.b_keys);
+            
+            // Move children from right child to left child if not leaf
+            if (!b_leftChild.b_isLeaf) {
+                b_rightChild.b_children.forEach(b_c => {
+                    b_c.b_parent = b_leftChild;
+                    b_leftChild.b_children.push(b_c);
+                });
+            }
+            
+            // Remove right child from parent
+            b_parent.b_children.splice(b_index + 1, 1);
+        }
+        
+        b_inOrder(b_node = this.b_root, b_result = []) {
+            if (!b_node) return b_result;
+            
+            for (let b_i = 0; b_i < b_node.b_keys.length; b_i++) {
+                if (!b_node.b_isLeaf) {
+                    this.b_inOrder(b_node.b_children[b_i], b_result);
+                }
+                b_result.push(b_node.b_keys[b_i]);
+            }
+            
+            if (!b_node.b_isLeaf) {
+                this.b_inOrder(b_node.b_children[b_node.b_children.length - 1], b_result);
+            }
+            
+            return b_result;
+        }
+    }
+
+    // Variáveis globais para BTree
+    let b_tree;
+    const b_treeContainer = $('#b_tree-container');
+    let b_nodeElements = {};
+    let b_lineElements = [];
+    let b_traversalSequence = [];
+    let b_animationSpeed = 800;
+
+    // Funções de Visualização para BTree
+    function b_clearTreeVisualization() {
+        b_treeContainer.empty();
+        b_nodeElements = {};
+        b_lineElements = [];
+    }
+
+    function b_calculatePositions(b_node, b_level, b_pos, b_positions, b_width, b_depth) {
+        if (!b_node) return;
+        
+        const b_nodeId = b_node.b_keys.join('-');
+        const b_spacing = b_width / (Math.pow(2, b_level + 1)) * (0.6 + (0.4 / (b_depth + 1)));
+        
+        b_positions[b_nodeId] = {
+            b_x: b_pos,
+            b_y: b_level * 120 + 50,
+            b_node: b_node
+        };
+        
+        if (!b_node.b_isLeaf) {
+            const b_childSpacing = b_width / (Math.pow(2, b_level + 2));
+            let b_childPos = b_pos - (b_node.b_children.length - 1) * b_childSpacing / 2;
+            
+            for (let b_i = 0; b_i < b_node.b_children.length; b_i++) {
+                b_calculatePositions(b_node.b_children[b_i], b_level + 1, b_childPos, b_positions, b_width, b_depth);
+                b_childPos += b_childSpacing;
+            }
+        }
+    }
+
+    function b_getTreeDepth(b_node) {
+        if (!b_node) return 0;
+        if (b_node.b_isLeaf) return 1;
+        
+        let b_maxDepth = 0;
+        for (const b_child of b_node.b_children) {
+            const b_childDepth = b_getTreeDepth(b_child);
+            if (b_childDepth > b_maxDepth) {
+                b_maxDepth = b_childDepth;
+            }
+        }
+        
+        return 1 + b_maxDepth;
+    }
+
+    function b_drawTree() {
+        b_clearTreeVisualization();
+        
+        const b_positions = {};
+        if (b_tree && b_tree.b_root.b_keys.length > 0) {
+            const b_treeDepth = b_getTreeDepth(b_tree.b_root);
+            b_calculatePositions(b_tree.b_root, 0, b_treeContainer.width() / 2, b_positions, b_treeContainer.width(), b_treeDepth);
+            
+            // Desenhar linhas primeiro (para ficarem atrás dos nós)
+            Object.keys(b_positions).forEach(b_nodeId => {
+                const b_nodeData = b_positions[b_nodeId];
+                const b_node = b_nodeData.b_node;
+                
+                if (!b_node.b_isLeaf) {
+                    for (let b_i = 0; b_i < b_node.b_children.length; b_i++) {
+                        const b_childNode = b_node.b_children[b_i];
+                        const b_childId = b_childNode.b_keys.join('-');
+                        const b_childPos = b_positions[b_childId];
+                        
+                        if (b_childPos) {
+                            b_drawLine(b_nodeData.b_x, b_nodeData.b_y + 40, b_childPos.b_x, b_childPos.b_y - 20);
+                        }
+                    }
+                }
+            });
+            
+            // Desenhar nós depois (para ficarem na frente das linhas)
+            Object.keys(b_positions).forEach(b_nodeId => {
+                const b_nodeData = b_positions[b_nodeId];
+                b_drawBNode(b_nodeData.b_node, b_nodeData.b_x, b_nodeData.b_y);
+            });
+        } else if (b_tree) {
+            b_treeContainer.text('Árvore vazia. Adicione alguns valores.');
+        } else {
+            b_treeContainer.text('Árvore não inicializada. Defina a ordem e clique em Inicializar.');
+        }
+    }
+
+    function b_drawBNode(b_node, b_x, b_y) {
+        const b_nodeId = b_node.b_keys.join('-');
+        const b_nodeDiv = $(`
+            <div class="b_node" id="b_node-${b_nodeId}" style="
+                left: ${b_x - 50}px; 
+                top: ${b_y - 20}px;
+            ">
+                <div class="b_node-values">
+                    ${b_node.b_keys.map(b_key => `<div class="b_node-value">${b_key}</div>`).join('')}
+                </div>
+            </div>
+        `);
+        
+        b_treeContainer.append(b_nodeDiv);
+        b_nodeElements[b_nodeId] = b_nodeDiv;
+        
+        // Animação de entrada
+        setTimeout(() => {
+            b_nodeDiv.css('transform', 'scale(1)');
+        }, 10);
+    }
+
+    function b_drawLine(b_x1, b_y1, b_x2, b_y2) {
+        const b_length = Math.sqrt(Math.pow(b_x2 - b_x1, 2) + Math.pow(b_y2 - b_y1, 2));
+        const b_angle = Math.atan2(b_y2 - b_y1, b_x2 - b_x1) * 180 / Math.PI;
+        
+        const b_line = $(`
+            <div class="b_line" style="
+                width: ${b_length}px;
+                left: ${b_x1}px;
+                top: ${b_y1}px;
+                transform: rotate(${b_angle}deg);
+            "></div>
+        `);
+        
+        b_treeContainer.append(b_line);
+        b_lineElements.push(b_line);
+        
+        // Animação de entrada
+        setTimeout(() => {
+            b_line.css('opacity', '1');
+        }, 500);
+    }
+
+    function b_animateRemoval(b_nodeId) {
+        const b_nodeElement = $(`#b_node-${b_nodeId}`);
+        if (b_nodeElement.length) {
+            b_nodeElement.addClass('b_removing');
+            setTimeout(() => {
+                b_nodeElement.css({
+                    'transform': 'scale(0)',
+                    'opacity': '0'
+                });
+            }, 500);
+        }
+    }
+
+    // Funções de Animação e Operações para BTree
+    async function b_highlightNode(b_nodeId, b_className) {
+        const b_nodeElement = $(`#b_node-${b_nodeId}`);
+        if (b_nodeElement.length) {
+            b_nodeElement.addClass(b_className);
+            await b_sleep(b_animationSpeed);
+            b_nodeElement.removeClass(b_className);
+            await b_sleep(200);
+        }
+    }
+
+    async function b_searchNode(b_node, b_key, b_path = []) {
+        if (!b_node) {
+            document.getElementById('b_treeStatus').textContent = `Valor ${b_key} não encontrado na árvore.`;
+            return false;
+        }
+        
+        const b_nodeId = b_node.b_keys.join('-');
+        b_path.push(b_nodeId);
+        
+        // Highlight current node
+        document.getElementById('b_treeStatus').textContent = `Procurando ${b_key} no nó [${b_node.b_keys.join(', ')}]...`;
+        await b_highlightNode(b_nodeId, 'b_current');
+        
+        let b_i = 0;
+        while (b_i < b_node.b_keys.length && b_key > b_node.b_keys[b_i]) {
+            b_i++;
+        }
+        
+        if (b_i < b_node.b_keys.length && b_key === b_node.b_keys[b_i]) {
+            document.getElementById('b_treeStatus').textContent = `Valor ${b_key} encontrado no nó [${b_node.b_keys.join(', ')}]!`;
+            await b_highlightNode(b_nodeId, 'b_found');
+            return true;
+        }
+        
+        if (b_node.b_isLeaf) {
+            document.getElementById('b_treeStatus').textContent = `Valor ${b_key} não encontrado na árvore.`;
+            return false;
+        }
+        
+        return await b_searchNode(b_node.b_children[b_i], b_key, b_path);
+    }
+
+    async function b_inOrderTraversal() {
+        if (!b_tree) {
+            document.getElementById('b_treeStatus').textContent = 'Árvore não inicializada.';
+            return;
+        }
+        
+        b_traversalSequence = [];
+        document.getElementById('b_traversalResult').textContent = '';
+        document.getElementById('b_treeStatus').textContent = 'Iniciando percurso em ordem...';
+        await b_sleep(500);
+        
+        const b_nodes = [];
+        function b_collectNodes(b_node = b_tree.b_root) {
+            if (!b_node) return;
+            
+            for (let b_i = 0; b_i < b_node.b_keys.length; b_i++) {
+                if (!b_node.b_isLeaf) {
+                    b_collectNodes(b_node.b_children[b_i]);
+                }
+                b_nodes.push(b_node);
+            }
+            
+            if (!b_node.b_isLeaf) {
+                b_collectNodes(b_node.b_children[b_node.b_children.length - 1]);
+            }
+        }
+        b_collectNodes();
+        
+        for (let b_i = 0; b_i < b_nodes.length; b_i++) {
+            const b_node = b_nodes[b_i];
+            const b_nodeId = b_node.b_keys.join('-');
+            
+            b_traversalSequence.push(...b_node.b_keys);
+            document.getElementById('b_traversalResult').textContent = b_traversalSequence.join(' → ');
+            await b_highlightNode(b_nodeId, 'b_highlight');
+        }
+        
+        document.getElementById('b_treeStatus').textContent = 'Percurso em ordem concluído!';
+    }
+
+    // Funções de Interface para BTree
+    function b_initializeTree() {
+        const b_order = parseInt(document.getElementById('b_treeOrder').value);
+        if (isNaN(b_order) || b_order < 3) {
+            document.getElementById('b_treeStatus').textContent = 'Por favor, insira uma ordem válida (mínimo 3).';
+            return;
+        }
+        
+        b_tree = new BTree(b_order);
+        b_drawTree();
+        
+        // Ativar botões
+        $('#b_addBtn').prop('disabled', false);
+        $('#b_removeBtn').prop('disabled', false);
+        $('#b_searchBtn').prop('disabled', false);
+        $('#b_traversalBtn').prop('disabled', false);
+        
+        document.getElementById('b_treeStatus').textContent = `Árvore B de ordem ${b_order} inicializada. Adicione valores.`;
+    }
+
+    function b_addToTree() {
+        const b_value = parseInt(document.getElementById('b_treeValue').value);
+        if (isNaN(b_value)) {
+            document.getElementById('b_treeStatus').textContent = 'Por favor, insira um número válido.';
+            return;
+        }
+        
+        if (b_tree.b_search(b_value)) {
+            document.getElementById('b_treeStatus').textContent = `Valor ${b_value} já existe na árvore.`;
+            return;
+        }
+        
+        b_tree.b_insert(b_value);
+        b_drawTree();
+        document.getElementById('b_treeStatus').textContent = `Valor ${b_value} adicionado à árvore.`;
+        document.getElementById('b_treeValue').value = '';
+    }
+
+    function b_removeFromTree() {
+        const b_value = parseInt(document.getElementById('b_treeValue').value);
+        if (isNaN(b_value)) {
+            document.getElementById('b_treeStatus').textContent = 'Por favor, insira um número válido.';
+            return;
+        }
+        
+        const b_searchResult = b_tree.b_search(b_value);
+        if (!b_searchResult) {
+            document.getElementById('b_treeStatus').textContent = `Valor ${b_value} não encontrado na árvore.`;
+            return;
+        }
+        
+        const b_nodeId = b_searchResult.b_node.b_keys.join('-');
+        b_animateRemoval(b_nodeId);
+        
+        setTimeout(() => {
+            b_tree.b_remove(b_value);
+            b_drawTree();
+            document.getElementById('b_treeStatus').textContent = `Valor ${b_value} removido da árvore.`;
+            document.getElementById('b_treeValue').value = '';
+        }, 1000);
+    }
+
+    async function b_searchInTree() {
+        const b_value = parseInt(document.getElementById('b_treeValue').value);
+        if (isNaN(b_value)) {
+            document.getElementById('b_treeStatus').textContent = 'Por favor, insira um número válido.';
+            return;
+        }
+        
+        await b_searchNode(b_tree.b_root, b_value);
+        document.getElementById('b_treeValue').value = '';
+    }
+
+    function b_sleep(b_ms) {
+        return new Promise(b_resolve => setTimeout(b_resolve, b_ms));
+    }
+
+    // Inicialização BTree
+    $(document).ready(function() {
+        // Desativar botões até a árvore ser inicializada
+        $('#b_addBtn').prop('disabled', true);
+        $('#b_removeBtn').prop('disabled', true);
+        $('#b_searchBtn').prop('disabled', true);
+        $('#b_traversalBtn').prop('disabled', true);
+    });
+</script>
+
+
+<div class="container-fluid">
+    
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="tree-card">
+                <h3 class="version-title">Árvore de Fibonacci</h3>
+                <p>Explore a relação recursiva da sequência de Fibonacci através desta representação em árvore binária</p>
+                
+                <div class="input-container">
+                    <div class="slider-container">
+                        <label for="f_fibLevel">Nível:</label>
+                        <input type="range" id="f_fibLevel" min="0" max="10" value="5" class="slider">
+                        <span class="slider-value" id="f_fibLevelValue">5</span>
+                    </div>
+                    
+                    <div class="controls-container">
+                        <button class="tree-button generate-btn" onclick="f_generateFibonacciTree()">Gerar Árvore</button>
+                        <button class="tree-button fib-btn" onclick="f_showFibonacciSequence()">Mostrar Sequência</button>
+                        <button class="tree-button animate-btn" onclick="f_animateTreeConstruction()">Animar Construção</button>
+                    </div>
+                    
+                    <div class="f_status" id="f_treeStatus">Ajuste o nível e clique em Gerar Árvore.</div>
+                    <div class="fib-sequence" id="f_fibSequence"></div>
+                </div>
+                
+                <div id="f_tree-container">Árvore não gerada ainda.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Variáveis globais com prefixo f_
+    let f_nodes = [];
+    let f_lines = [];
+    let f_animationSpeed = 800;
+    let f_currentLevel = 5;
+    const f_treeContainer = $('#f_tree-container');
+    let f_nodeElements = {};
+    let f_lineElements = [];
+
+    // Função para calcular Fibonacci
+    function f_fibonacci(n) {
+        if (n <= 1) return n;
+        return f_fibonacci(n - 1) + f_fibonacci(n - 2);
+    }
+
+    // Função principal que calcula as posições dos nós e linhas
+    function f_calculatePositions(n, x, y, length, direction, f_parentId = null) {
+        if (n < 0) return null;
+        
+        // Cria o nó atual
+        const f_nodeId = f_nodes.length;
+        const f_fibValue = f_fibonacci(n);
+        f_nodes.push({
+            id: f_nodeId,
+            x: x,
+            y: y,
+            value: f_fibValue,
+            parentId: f_parentId,
+            level: n
+        });
+        
+        // Caso base - folhas da árvore
+        if (n <= 1) return f_nodeId;
+        
+        // Calcula parâmetros para os ramos esquerdo e direito
+        const f_leftLength = length * 0.7;  // Fator de redução para ramo esquerdo
+        const f_rightLength = length * 0.63; // Fator de redução para ramo direito (0.7 * 0.9)
+        const f_leftAngle = direction - Math.PI/4;  // -45 graus
+        const f_rightAngle = direction + Math.PI/4; // +45 graus
+        
+        // Calcula posições dos nós filhos
+        const f_leftX = x + Math.cos(f_leftAngle) * f_leftLength;
+        const f_leftY = y + Math.sin(f_leftAngle) * f_leftLength;
+        const f_rightX = x + Math.cos(f_rightAngle) * f_rightLength;
+        const f_rightY = y + Math.sin(f_rightAngle) * f_rightLength;
+        
+        // Cria as linhas de conexão antes de processar os filhos
+        f_lines.push({
+            x1: x, y1: y,
+            x2: f_leftX, y2: f_leftY,
+            nodeId: f_nodeId,
+            childType: 'left'
+        });
+        
+        f_lines.push({
+            x1: x, y1: y,
+            x2: f_rightX, y2: f_rightY,
+            nodeId: f_nodeId,
+            childType: 'right'
+        });
+        
+        // Chamadas recursivas para construir a árvore
+        f_calculatePositions(n - 1, f_leftX, f_leftY, f_leftLength, f_leftAngle, f_nodeId); // Ramo esquerdo (F(n-1))
+        f_calculatePositions(n - 2, f_rightX, f_rightY, f_rightLength, f_rightAngle, f_nodeId); // Ramo direito (F(n-2))
+        
+        return f_nodeId;
+    }
+
+    // Funções de Visualização
+    function f_clearTreeVisualization() {
+        f_treeContainer.empty();
+        f_nodeElements = {};
+        f_lineElements = [];
+    }
+
+    function f_drawTree() {
+        f_clearTreeVisualization();
+        
+        if (f_nodes.length === 0) {
+            f_treeContainer.text('Árvore não gerada ainda.');
+            return;
+        }
+        
+        // Desenhar linhas primeiro (para ficarem atrás dos nós)
+        f_lines.forEach(f_line => {
+            f_drawLine(f_line.x1, f_line.y1, f_line.x2, f_line.y2);
+        });
+        
+        // Desenhar nós
+        f_nodes.forEach(f_node => {
+            f_drawNode(f_node.value, f_node.x, f_node.y, f_node.level);
+        });
+    }
+
+    function f_drawNode(f_value, f_x, f_y, f_level) {
+        const f_nodeId = `f_node-${f_value}-${f_level}`;
+        const f_node = $(`
+            <div class="f_node fib" id="${f_nodeId}" style="
+                left: ${f_x - 25}px; 
+                top: ${f_y - 25}px;
+                background-color: ${f_getColorForLevel(f_level)};
+            ">${f_value}</div>
+        `);
+        
+        f_treeContainer.append(f_node);
+        f_nodeElements[f_nodeId] = f_node;
+        
+        // Animação de entrada
+        setTimeout(() => {
+            f_node.css('transform', 'scale(1)');
+        }, 10);
+    }
+
+    function f_getColorForLevel(f_level) {
+        const f_colors = [
+            '#4CAF50', '#2196F3', '#9C27B0', '#FF9800', 
+            '#E91E63', '#00BCD4', '#8BC34A', '#FF5722', 
+            '#673AB7', '#3F51B5', '#009688'
+        ];
+        return f_colors[f_level % f_colors.length];
+    }
+
+    function f_drawLine(f_x1, f_y1, f_x2, f_y2) {
+        const f_length = Math.sqrt(Math.pow(f_x2 - f_x1, 2) + Math.pow(f_y2 - f_y1, 2));
+        const f_angle = Math.atan2(f_y2 - f_y1, f_x2 - f_x1) * 180 / Math.PI;
+        
+        const f_line = $(`
+            <div class="f_line" style="
+                width: ${f_length}px;
+                left: ${f_x1}px;
+                top: ${f_y1}px;
+                transform: rotate(${f_angle}deg);
+            "></div>
+        `);
+        
+        f_treeContainer.append(f_line);
+        f_lineElements.push(f_line);
+        
+        // Animação de entrada
+        setTimeout(() => {
+            f_line.css('opacity', '1');
+        }, 500);
+    }
+
+    // Funções de Interface
+    function f_generateFibonacciTree() {
+        const f_levelInput = document.getElementById('f_fibLevel');
+        f_currentLevel = parseInt(f_levelInput.value);
+        
+        if (isNaN(f_currentLevel) || f_currentLevel < 0 || f_currentLevel > 10) {
+            document.getElementById('f_treeStatus').textContent = 'Por favor, selecione um nível entre 0 e 10.';
+            f_levelInput.value = 5;
+            f_currentLevel = 5;
+            return;
+        }
+        
+        // Resetar arrays
+        f_nodes = [];
+        f_lines = [];
+        
+        // Calcular posições começando do centro da área de visualização
+        const f_startX = f_treeContainer.width() / 2;
+        const f_startY = 80;
+        const f_initialLength = f_treeContainer.width() / 4;
+        
+        f_calculatePositions(f_currentLevel, f_startX, f_startY, f_initialLength, Math.PI/2);
+        f_drawTree();
+        
+        document.getElementById('f_treeStatus').textContent = `Árvore de Fibonacci de nível ${f_currentLevel} gerada.`;
+        document.getElementById('f_fibSequence').textContent = '';
+    }
+
+    function f_showFibonacciSequence() {
+        if (f_nodes.length === 0) {
+            document.getElementById('f_fibSequence').textContent = 'Gere a árvore primeiro.';
+            return;
+        }
+        
+        // Calcular sequência até o nível atual
+        const f_sequence = [];
+        for (let f_i = 0; f_i <= f_currentLevel; f_i++) {
+            f_sequence.push(f_fibonacci(f_i));
+        }
+        
+        document.getElementById('f_fibSequence').innerHTML = `
+            <strong>Sequência de Fibonacci até F(${f_currentLevel}):</strong><br>
+            ${f_sequence.map((f_val, f_idx) => `F(${f_idx}) = ${f_val}`).join('<br>')}
+        `;
+        
+        // Animar os nós na sequência
+        f_animateSequence(f_sequence);
+    }
+
+    async function f_animateTreeConstruction() {
+        if (f_nodes.length === 0) {
+            document.getElementById('f_treeStatus').textContent = 'Gere a árvore primeiro.';
+            return;
+        }
+        
+        document.getElementById('f_treeStatus').textContent = 'Animando construção da árvore...';
+        
+        // Ordenar nós por nível (do maior para o menor)
+        const f_sortedNodes = [...f_nodes].sort((f_a, f_b) => f_b.level - f_a.level);
+        
+        // Mostrar nós e linhas gradualmente
+        for (const f_node of f_sortedNodes) {
+            const f_nodeId = `f_node-${f_node.value}-${f_node.level}`;
+            const f_nodeElement = f_nodeElements[f_nodeId];
+            
+            if (f_nodeElement) {
+                // Mostrar linhas que levam a este nó (se não for a raiz)
+                if (f_node.parentId !== null) {
+                    const f_parentNode = f_nodes[f_node.parentId];
+                    const f_parentKey = `f_node-${f_parentNode.value}-${f_parentNode.level}`;
+                    const f_parentElement = f_nodeElements[f_parentKey];
+                    
+                    if (f_parentElement) {
+                        f_parentElement.addClass('current');
+                        await f_sleep(f_animationSpeed / 2);
+                        
+                        // Encontrar e mostrar a linha correspondente
+                        const f_childType = f_node.level === f_parentNode.level - 1 ? 'left' : 'right';
+                        const f_line = f_lines.find(f_l => 
+                            f_l.nodeId === f_node.parentId && f_l.childType === f_childType);
+                        
+                        if (f_line) {
+                            const f_lineIndex = f_lines.indexOf(f_line);
+                            if (f_lineElements[f_lineIndex]) {
+                                f_lineElements[f_lineIndex].css('opacity', '1');
+                            }
+                        }
+                        
+                        await f_sleep(f_animationSpeed / 2);
+                        f_parentElement.removeClass('current');
+                    }
+                }
+                
+                // Mostrar o nó atual
+                f_nodeElement.css('transform', 'scale(1)');
+                f_nodeElement.addClass('highlight');
+                await f_sleep(f_animationSpeed);
+                f_nodeElement.removeClass('highlight');
+            }
+        }
+        
+        document.getElementById('f_treeStatus').textContent = 'Animação da construção concluída.';
+    }
+
+    async function f_animateSequence(f_sequence) {
+        document.getElementById('f_treeStatus').textContent = 'Mostrando sequência de Fibonacci...';
+        
+        for (let f_i = 0; f_i < f_sequence.length; f_i++) {
+            const f_value = f_sequence[f_i];
+            // Encontrar todos os nós com este valor (pode haver múltiplos em diferentes níveis)
+            const f_matchingNodes = f_nodes.filter(f_node => f_node.value === f_value);
+            
+            for (const f_node of f_matchingNodes) {
+                const f_nodeId = `f_node-${f_node.value}-${f_node.level}`;
+                const f_nodeElement = f_nodeElements[f_nodeId];
+                
+                if (f_nodeElement) {
+                    f_nodeElement.addClass('highlight');
+                    await f_sleep(f_animationSpeed / 2);
+                    f_nodeElement.removeClass('highlight');
+                    await f_sleep(f_animationSpeed / 2);
+                }
+            }
+        }
+        
+        document.getElementById('f_treeStatus').textContent = 'Sequência de Fibonacci mostrada.';
+    }
+
+    function f_sleep(f_ms) {
+        return new Promise(f_resolve => setTimeout(f_resolve, f_ms));
+    }
+
+    // Inicialização
+    $(document).ready(function() {
+        // Atualizar valor exibido do slider
+        $('#f_fibLevel').on('input', function() {
+            $('#f_fibLevelValue').text(this.value);
+        });
+        
+        // Gerar uma árvore inicial
+        f_generateFibonacciTree();
+    });
+</script>
+{% endblock %} 
